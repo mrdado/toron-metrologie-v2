@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Option 1: Compact Stats Bar - Wireframe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Marker Felt', cursive;
+            background: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+
+        .wireframe-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            padding: 0;
+            border: 3px solid #333;
+        }
+
+        .wireframe-title {
+            font-size: 20px;
+            margin: 20px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            border-bottom: 2px solid #666;
+            padding: 12px 15px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-box {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #333;
+            background: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            width: 28px;
+            height: 28px;
+            border: 2px solid #666;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        /* Compact Stats Bar */
+        .stats-bar {
+            display: flex;
+            border-bottom: 1px dashed #999;
+            background: #fafafa;
+        }
+
+        .stat-item {
+            flex: 1;
+            padding: 10px 8px;
+            text-align: center;
+            border-right: 1px solid #ddd;
+        }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            color: #666;
+            line-height: 1.2;
+        }
+
+        .stat-alert {
+            color: #d00;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 20px 15px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            border: 3px solid #333;
+            padding: 16px;
+            background: #e0e0e0;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .btn-primary.highlight {
+            background: #999;
+            color: white;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border: 2px solid currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .btn-secondary {
+            border: 2px solid #666;
+            padding: 12px;
+            background: white;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .btn-icon-sm {
+            width: 24px;
+            height: 24px;
+            border: 1px solid currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .divider {
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+
+        .section-title {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+
+        /* Tag Badge */
+        .tag {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            z-index: 10;
+            border-radius: 3px;
+        }
+
+        .tag-reuse {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .tag-new {
+            background: #FF9800;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="wireframe-container">
+        <h1 class="wireframe-title">Option 1: Compact Stats Bar</h1>
+
+        <!-- Top Navigation -->
+        <!-- REUSABLE: HomeLayout from src/components/layout/HomeLayout.jsx -->
+        <div style="position: relative;">
+            <span class="tag tag-reuse" title="src/components/layout/HomeLayout.jsx">[REUSE] HomeLayout</span>
+            <div class="top-nav">
+                <div class="logo-area">
+                    <div class="logo-box">T</div>
+                    <div class="logo-text">Toron Metrologie</div>
+                </div>
+                <div class="logout-btn">[X]</div>
+            </div>
+        </div>
+
+        <!-- Compact Stats Bar -->
+        <!-- NEW COMPONENT: StatsBar (to be created at src/components/ui/StatsBar.jsx) -->
+        <div style="position: relative;">
+            <span class="tag tag-new" title="To be created at src/components/ui/StatsBar.jsx">[NEW] StatsBar</span>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number">142</div>
+                    <div class="stat-label">Torons</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">68</div>
+                    <div class="stat-label">Équipements</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number stat-alert">7</div>
+                    <div class="stat-label">Calibration<br/>Expirée</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Primary Action -->
+            <!-- REUSABLE: Button from src/components/ui/Button.jsx -->
+            <div style="position: relative;">
+                <span class="tag tag-reuse" title="src/components/ui/Button.jsx">[REUSE] Button</span>
+                <div class="btn-primary highlight">
+                    <div class="btn-icon">[QR]</div>
+                    <span>Scanner QR Code</span>
+                </div>
+            </div>
+
+            <!-- Secondary Actions -->
+            <div class="btn-primary">
+                <div class="btn-icon">[+]</div>
+                <span>Ajouter Toron</span>
+            </div>
+
+            <div class="btn-primary">
+                <div class="btn-icon">[+]</div>
+                <span>Ajouter Équipement</span>
+            </div>
+
+            <!-- Divider -->
+            <div class="divider"></div>
+
+            <!-- Tertiary Actions -->
+            <div class="section-title">Gestion</div>
+
+            <div class="btn-secondary">
+                <div class="btn-icon-sm">[≡]</div>
+                <span>Gérer Torons</span>
+            </div>
+
+            <div class="btn-secondary">
+                <div class="btn-icon-sm">[≡]</div>
+                <span>Gérer Équipements</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
