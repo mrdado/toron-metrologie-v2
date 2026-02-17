@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { Save, Trash2, QrCode, ArrowLeft } from 'lucide-react';
+import { Save, Trash2, QrCode, ArrowLeft, Upload } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -11,6 +11,7 @@ const EditToron = () => {
     const { updateToron, deleteItem } = useInventory();
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
+    const [files, setFiles] = useState([]);
 
     const [formData, setFormData] = useState({
         fournisseur: '',
@@ -49,7 +50,7 @@ const EditToron = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await updateToron(id, formData);
+            await updateToron(id, formData, files);
             alert("Toron mis à jour avec succès");
             navigate('/torons/edit');
         } catch (error) {
@@ -195,11 +196,58 @@ const EditToron = () => {
                     />
                 </div>
 
-                {/* Certificat Note */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-sm text-blue-800">
-                        <strong>Certificat de qualité:</strong> Télécharger des fichiers
-                    </p>
+                {/* Certificat Upload */}
+                <div>
+                    <label className="input-label">Certificats de qualité</label>
+
+                    {/* Existing Files */}
+                    {formData.certificates && formData.certificates.length > 0 && (
+                        <div className="space-y-2 mb-4">
+                            {formData.certificates.map((cert, index) => (
+                                <div key={index} className="flex items-center justify-between p-2 bg-blue-50 border border-blue-100 rounded-lg">
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                        <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded flex items-center justify-center shrink-0">
+                                            <Upload size={14} />
+                                        </div>
+                                        <span className="text-xs font-medium truncate">{cert.name}</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const newCerts = formData.certificates.filter((_, i) => i !== index);
+                                            setFormData({ ...formData, certificates: newCerts });
+                                        }}
+                                        className="text-red-500 hover:text-red-700 p-1"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="relative">
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*,.pdf"
+                            onChange={(e) => setFiles([...e.target.files])}
+                            className="hidden"
+                            id="file-upload"
+                        />
+                        <label
+                            htmlFor="file-upload"
+                            className="btn btn-outline cursor-pointer"
+                        >
+                            <Upload size={20} />
+                            {formData.certificates?.length > 0 ? 'Ajouter d\'autres fichiers' : 'Télécharger des fichiers'}
+                        </label>
+                        {files.length > 0 && (
+                            <p className="text-sm text-blue-600 mt-2 font-medium">
+                                + {files.length} novo(s) arquivo(s) selecionado(s)
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 {/* Save Button */}

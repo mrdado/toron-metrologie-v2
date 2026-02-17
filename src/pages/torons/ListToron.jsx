@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { ArrowLeft, FileSpreadsheet, Upload, QrCode, Edit } from 'lucide-react';
+import { ArrowLeft, FileSpreadsheet, Upload, QrCode, Edit, Eye } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
 
 const ListToron = () => {
@@ -141,18 +141,26 @@ const ListToron = () => {
                                     </span>
                                 </div>
 
-                                <p className="text-sm text-gray-500">
-                                    ID: {toron.identification}
-                                </p>
+                                <div className="flex items-center gap-3">
+                                    <p className="text-sm text-gray-500">
+                                        ID: {toron.identification}
+                                    </p>
+                                    {toron.certificates && toron.certificates.length > 0 && (
+                                        <span className="flex items-center gap-1 text-blue-600 font-medium text-xs bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                                            <Upload size={12} />
+                                            {toron.certificates.length} {toron.certificates.length > 1 ? 'arquivos' : 'arquivo'}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => navigate(`/torons/view/${toron.id}`)}
-                                    className="icon-btn"
-                                    title="QR Code"
+                                    className="icon-btn text-blue-600 hover:bg-blue-50"
+                                    title="Voir Détails"
                                 >
-                                    <QrCode size={20} />
+                                    <Eye size={20} />
                                 </button>
                                 <button
                                     onClick={() => navigate(`/torons/edit/${toron.id}`)}

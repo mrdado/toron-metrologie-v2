@@ -15,7 +15,7 @@ const InventoryContext = createContext();
 
 export const useInventory = () => useContext(InventoryContext);
 
-import { uploadCertificate } from '../utils/blob';
+import { uploadCertificate, deleteFiles } from '../utils/blob';
 
 export const InventoryProvider = ({ children }) => {
     const [torons, setTorons] = useState([]);
@@ -124,9 +124,36 @@ export const InventoryProvider = ({ children }) => {
         }
     };
 
-    const updateToron = async (id, data) => {
-        const docRef = doc(db, 'torons', id);
-        await updateDoc(docRef, data);
+    const updateToron = async (id, data, newFiles = []) => {
+        try {
+            const docRef = doc(db, 'torons', id);
+
+            let updatedCertificates = data.certificates || [];
+
+            if (newFiles.length > 0) {
+                console.log("Uploading additional files...");
+                for (const file of newFiles) {
+                    const url = await uploadCertificate(file, file.name);
+                    if (url) {
+                        updatedCertificates.push({
+                            name: String(file.name),
+                            type: String(file.type),
+                            size: Number(file.size),
+                            url: String(url)
+                        });
+                    }
+                }
+            }
+
+            const cleanData = JSON.parse(JSON.stringify(data));
+            await updateDoc(docRef, {
+                ...cleanData,
+                certificates: updatedCertificates
+            });
+        } catch (err) {
+            console.error("Error updating toron:", err);
+            throw err;
+        }
     };
 
     const updateEquipment = async (id, data) => {
@@ -134,8 +161,22 @@ export const InventoryProvider = ({ children }) => {
         await updateDoc(docRef, data);
     };
 
-    const deleteItem = async (id, type) => {
+    const deleteItem = async (type, id) => {
         try {
+            if (type === 'toron') {
+                // Get the toron data first to find certificate URLs
+                const docRef = doc(db, 'torons', id);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.certificates && data.certificates.length > 0) {
+                        const urls = data.certificates.map(c => c.url);
+                        console.log("Deleting associated files:", urls);
+                        await deleteFiles(urls);
+                    }
+                }
+            }
+
             const collectionName = type === 'toron' ? 'torons' : 'equipements';
             await deleteDoc(doc(db, collectionName, id));
         } catch (err) {
