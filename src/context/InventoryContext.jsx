@@ -15,6 +15,8 @@ const InventoryContext = createContext();
 
 export const useInventory = () => useContext(InventoryContext);
 
+import { uploadCertificate } from '../utils/blob';
+
 export const InventoryProvider = ({ children }) => {
     const [torons, setTorons] = useState([]);
     const [equipements, setEquipements] = useState([]);
@@ -58,40 +60,43 @@ export const InventoryProvider = ({ children }) => {
         try {
             console.log("addToron called with:", data, files);
 
-            // Convert files to Base64 (no Storage needed)
             const uploadedFiles = [];
             if (files.length > 0) {
-                console.log("Converting files to Base64...");
+                console.log("Uploading files to Vercel Blob...");
                 for (const file of files) {
-                    // Read file as Base64
-                    const base64 = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(file);
-                    });
-
-                    uploadedFiles.push({
-                        name: file.name,
-                        type: file.type,
-                        size: file.size,
-                        data: base64 // Base64 string
-                    });
+                    try {
+                        const url = await uploadCertificate(file, file.name);
+                        if (url) {
+                            uploadedFiles.push({
+                                name: String(file.name || 'document'),
+                                type: String(file.type || 'application/octet-stream'),
+                                size: Number(file.size || 0),
+                                url: String(url)
+                            });
+                        }
+                    } catch (uploadErr) {
+                        console.error("Failed to upload file:", file.name, uploadErr);
+                        // We continue with other files or throw depending on importance
+                    }
                 }
-                console.log("Files converted:", uploadedFiles.length);
+                console.log("Files uploaded:", uploadedFiles.length);
             }
 
-            // Save to Firestore with timeout
-            console.log("Saving to Firestore...");
+            // Sanitize data to ensure it's a plain object with no undefined/complex types
+            const cleanData = JSON.parse(JSON.stringify(data));
 
-            const savePromise = addDoc(collection(db, 'torons'), {
-                ...data,
+            const docData = {
+                ...cleanData,
                 certificates: uploadedFiles,
                 createdAt: new Date().toISOString()
-            });
+            };
+
+            console.log("Saving to Firestore with sanitized data...");
+
+            const savePromise = addDoc(collection(db, 'torons'), docData);
 
             const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("Firestore timeout - vérifiez les règles de sécurité")), 10000)
+                setTimeout(() => reject(new Error("Firestore timeout - verifique a conexão ou permissões")), 15000)
             );
 
             const docRef = await Promise.race([savePromise, timeoutPromise]);
@@ -100,7 +105,6 @@ export const InventoryProvider = ({ children }) => {
             return docRef.id;
         } catch (err) {
             console.error("Error adding toron:", err);
-            console.error("Error details:", err.code, err.message);
             throw err;
         }
     };

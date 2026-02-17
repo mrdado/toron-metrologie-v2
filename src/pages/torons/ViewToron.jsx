@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { X, Download, Share2 } from 'lucide-react';
+import { X, Download, Share2, Upload } from 'lucide-react';
 import QRCode from 'qrcode';
 
 const ViewToron = () => {
@@ -103,13 +103,13 @@ const ViewToron = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 mb-6">
                     <button
                         onClick={handleDownload}
                         className="btn btn-outline btn-sm"
                     >
                         <Download size={18} />
-                        Télécharger
+                        QR Code
                     </button>
                     <button
                         onClick={handleShare}
@@ -119,6 +119,41 @@ const ViewToron = () => {
                         Partager
                     </button>
                 </div>
+
+                {/* Certificates Section */}
+                {toron?.certificates && toron.certificates.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                            Certificats de Qualité
+                        </h3>
+                        <div className="space-y-2">
+                            {toron.certificates.map((cert, index) => (
+                                <a
+                                    key={index}
+                                    href={cert.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded flex items-center justify-center">
+                                            <Upload size={16} />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-gray-900 truncate max-w-[180px]">
+                                                {cert.name}
+                                            </span>
+                                            <span className="text-xs text-gray-500">
+                                                {(cert.size / 1024).toFixed(1)} KB
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <Download size={18} className="text-gray-400 group-hover:text-blue-500" />
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
