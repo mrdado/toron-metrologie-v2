@@ -1,16 +1,16 @@
-import { put } from '@vercel/blob';
+import { upload } from '@vercel/blob/client';
 
 /**
- * Uploads a file to Vercel Blob storage.
+ * Uploads a file to Vercel Blob storage securely.
  * @param {File} file - The file to upload.
- * @param {string} path - The path/name for the file in storage.
+ * @param {string} fileName - The name for the file in storage.
  * @returns {Promise<string>} - The URL of the uploaded file.
  */
 export const uploadCertificate = async (file, fileName) => {
     try {
-        const blob = await put(`certificates/${Date.now()}-${fileName}`, file, {
+        const blob = await upload(`certificates/${fileName}`, file, {
             access: 'public',
-            token: import.meta.env.VITE_BLOB_READ_WRITE_TOKEN,
+            handleUploadUrl: '/api/upload',
         });
         return blob.url;
     } catch (error) {
