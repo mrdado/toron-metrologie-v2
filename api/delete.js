@@ -5,7 +5,7 @@ export default async function handler(request, response) {
         return response.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { urls } = await request.json();
+    const { urls } = request.body;
 
     if (!urls || !Array.isArray(urls)) {
         return response.status(400).json({ error: 'Invalid URLs provided' });
