@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Scanner } from '@yudiel/react-qr-scanner';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Camera, X } from 'lucide-react';
@@ -9,79 +9,57 @@ const ScanGlobal = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [scannerStarted, setScannerStarted] = useState(false);
+    const [cameraError, setCameraError] = useState(null);
 
-    useEffect(() => {
-        let scanner = null;
+    const handleScan = async (result) => {
+        if (!result || !result[0] || loading) return;
 
-        const initScanner = () => {
-            scanner = new Html5QrcodeScanner(
-                "qr-reader",
-                {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0
-                },
-                false
-            );
+        const decodedText = result[0].rawValue;
+        if (!decodedText) return;
 
-            scanner.render(handleScan, handleError);
-            setScannerStarted(true);
-        };
+        setLoading(true);
+        setError('');
+        setCameraError(null);
 
-        const handleScan = async (decodedText) => {
-            if (loading) return;
-            setLoading(true);
-            setError('');
+        try {
+            // Try Torons first
+            const toronRef = doc(db, 'torons', decodedText);
+            const toronSnap = await getDoc(toronRef);
 
-            try {
-                // Try Torons first
-                const toronRef = doc(db, 'torons', decodedText);
-                const toronSnap = await getDoc(toronRef);
-
-                if (toronSnap.exists()) {
-                    scanner?.clear();
-                    navigate(`/torons/view/${decodedText}`);
-                    return;
-                }
-
-                // Try Equipment
-                const equipRef = doc(db, 'equipements', decodedText);
-                const equipSnap = await getDoc(equipRef);
-
-                if (equipSnap.exists()) {
-                    scanner?.clear();
-                    navigate(`/equipements/view/${decodedText}`);
-                    return;
-                }
-
-                // Not found
-                setError(`Item non trouvé (ID: ${decodedText})`);
-                setLoading(false);
-
-            } catch (err) {
-                console.error("Error scanning:", err);
-                setError("Erreur de lecture: " + err.message);
-                setLoading(false);
+            if (toronSnap.exists()) {
+                navigate(`/torons/view/${decodedText}`);
+                return;
             }
-        };
 
-        const handleError = (err) => {
-            // Ignore common camera errors during initialization
-            if (err && !err.includes("NotAllowedError")) {
-                console.warn("Scanner error:", err);
+            // Try Equipment
+            const equipRef = doc(db, 'equipements', decodedText);
+            const equipSnap = await getDoc(equipRef);
+
+            if (equipSnap.exists()) {
+                navigate(`/equipements/view/${decodedText}`);
+                return;
             }
-        };
 
-        // Auto-start scanner
-        initScanner();
+            // Not found
+            setError(`Item non trouvé (ID: ${decodedText})`);
+            setLoading(false);
 
-        return () => {
-            if (scanner) {
-                scanner.clear().catch(console.error);
+        } catch (err) {
+            console.error("Error scanning:", err);
+            setError("Erreur de lecture: " + err.message);
+            setLoading(false);
+        }
+    };
+
+    const handleError = (error) => {
+        if (error) {
+            if (error.name === 'NotAllowedError') {
+                setCameraError('Accès à la caméra refusé. Veuillez autoriser l\'accès.');
+            } else if (error.name !== 'NotFoundException') {
+                setCameraError('Erreur de caméra');
             }
-        };
-    }, [navigate, loading]);
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
@@ -96,6 +74,7 @@ const ScanGlobal = () => {
                     <button
                         onClick={() => navigate(-1)}
                         className="text-gray-400 hover:text-gray-600"
+                        aria-label="Fermer le scanner"
                     >
                         <X size={24} />
                     </button>
@@ -103,7 +82,17 @@ const ScanGlobal = () => {
 
                 {/* Scanner Area */}
                 <div className="relative bg-black">
-                    <div id="qr-reader" className="w-full"></div>
+                    <Scanner
+                        onScan={handleScan}
+                        onError={handleError}
+                        constraints={{
+                            facingMode: 'environment'
+                        }}
+                        styles={{
+                            container: { width: '100%' },
+                            video: { width: '100%', height: 'auto' }
+                        }}
+                    />
 
                     {/* Corner Brackets Overlay */}
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
@@ -127,7 +116,14 @@ const ScanGlobal = () => {
                     </p>
                 </div>
 
-                {/* Error Display */}
+                {/* Camera Error Display */}
+                {cameraError && (
+                    <div className="p-4 bg-orange-50 border-t border-orange-100">
+                        <p className="text-orange-600 text-sm text-center">{cameraError}</p>
+                    </div>
+                )}
+
+                {/* Scan Error Display */}
                 {error && (
                     <div className="p-4 bg-red-50 border-t border-red-100">
                         <p className="text-red-600 text-sm text-center">{error}</p>
