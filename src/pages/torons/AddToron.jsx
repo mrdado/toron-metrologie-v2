@@ -60,7 +60,7 @@ const AddToron = () => {
         try {
             if (id) {
                 console.log("Updating toron...");
-                await updateToron(id, formData);
+                await updateToron(id, formData, files);
                 alert("Toron mis à jour avec succès");
                 navigate('/torons/edit');
             } else {

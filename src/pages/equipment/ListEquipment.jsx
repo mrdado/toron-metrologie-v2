@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { ArrowLeft, FileSpreadsheet, Upload, QrCode, Edit, AlertCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, FileSpreadsheet, Upload, QrCode, Edit, AlertCircle, CheckCircle, Eye } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
 
 const ListEquipment = () => {
@@ -160,15 +160,21 @@ const ListEquipment = () => {
                                     <p className="text-sm text-gray-500">
                                         Expiration: {equip.dateExpiration}
                                     </p>
+                                    {equip.certificates && equip.certificates.length > 0 && (
+                                        <div className="mt-2 text-teal-600 font-medium text-xs flex items-center gap-1">
+                                            <Upload size={12} />
+                                            {equip.certificates.length} {equip.certificates.length > 1 ? 'fichiers' : 'fichier'}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => navigate(`/equipements/view/${equip.id}`)}
-                                        className="icon-btn"
-                                        title="QR Code"
+                                        className="icon-btn text-teal-600 hover:bg-teal-50"
+                                        title="Voir Détails"
                                     >
-                                        <QrCode size={20} />
+                                        <Eye size={20} />
                                     </button>
                                     <button
                                         onClick={() => navigate(`/equipements/edit/${equip.id}`)}

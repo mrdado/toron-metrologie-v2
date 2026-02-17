@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { Save, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft, Upload } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -12,6 +12,7 @@ const AddEquipment = () => {
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(!!id);
     const [createdId, setCreatedId] = useState(null);
+    const [files, setFiles] = useState([]);
 
     const [formData, setFormData] = useState({
         nom: '',
@@ -55,12 +56,12 @@ const AddEquipment = () => {
         try {
             if (id) {
                 console.log("Updating equipment...");
-                await updateEquipment(id, formData);
+                await updateEquipment(id, formData, files);
                 alert("Équipement mis à jour avec succès");
                 navigate('/equipements/edit');
             } else {
                 console.log("Adding new equipment...");
-                const newId = await addEquipment(formData);
+                const newId = await addEquipment(formData, files);
                 console.log("Created with ID:", newId);
                 setCreatedId(newId);
             }
@@ -201,6 +202,33 @@ const AddEquipment = () => {
                         value={formData.etalonnage}
                         onChange={handleChange}
                     />
+                </div>
+
+                {/* Certificat Upload */}
+                <div>
+                    <label className="input-label">Certificats de qualité / Étalonnage</label>
+                    <div className="relative">
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*,.pdf"
+                            onChange={(e) => setFiles([...e.target.files])}
+                            className="hidden"
+                            id="file-upload"
+                        />
+                        <label
+                            htmlFor="file-upload"
+                            className="btn btn-outline cursor-pointer"
+                        >
+                            <Upload size={20} />
+                            Télécharger des fichiers
+                        </label>
+                        {files.length > 0 && (
+                            <p className="text-sm text-gray-600 mt-2">
+                                {files.length} arquivo(s) selecionado(s)
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 {/* Submit Button */}

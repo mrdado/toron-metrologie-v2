@@ -7,7 +7,8 @@ import {
     deleteDoc,
     updateDoc,
     query,
-    orderBy
+    orderBy,
+    getDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -34,7 +35,6 @@ export const InventoryProvider = ({ children }) => {
             setTorons(data);
         }, (err) => {
             console.error("Error fetching torons:", err);
-            // Don't set global error to avoid blocking UI if just one collection fails
         });
         return () => unsubscribe();
     }, []);
@@ -76,31 +76,20 @@ export const InventoryProvider = ({ children }) => {
                         }
                     } catch (uploadErr) {
                         console.error("Failed to upload file:", file.name, uploadErr);
-                        // We continue with other files or throw depending on importance
+                        throw new Error(`Upload falhou para "${file.name}": ${uploadErr.message}. Certifique-se de estar usando 'vercel dev' para desenvolvimento local.`);
                     }
                 }
                 console.log("Files uploaded:", uploadedFiles.length);
             }
 
-            // Sanitize data to ensure it's a plain object with no undefined/complex types
             const cleanData = JSON.parse(JSON.stringify(data));
-
             const docData = {
                 ...cleanData,
                 certificates: uploadedFiles,
                 createdAt: new Date().toISOString()
             };
 
-            console.log("Saving to Firestore with sanitized data...");
-
-            const savePromise = addDoc(collection(db, 'torons'), docData);
-
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("Firestore timeout - verifique a conexão ou permissões")), 15000)
-            );
-
-            const docRef = await Promise.race([savePromise, timeoutPromise]);
-
+            const docRef = await addDoc(collection(db, 'torons'), docData);
             console.log("Toron saved with ID:", docRef.id);
             return docRef.id;
         } catch (err) {
@@ -109,14 +98,37 @@ export const InventoryProvider = ({ children }) => {
         }
     };
 
-    const addEquipment = async (data) => {
+    const addEquipment = async (data, files = []) => {
         try {
-            console.log("addEquipment called with:", data);
-            const docRef = await addDoc(collection(db, 'equipements'), {
-                ...data,
+            let uploadedFiles = [];
+            if (files.length > 0) {
+                console.log("Uploading files...");
+                for (const file of files) {
+                    try {
+                        const url = await uploadCertificate(file, file.name);
+                        if (url) {
+                            uploadedFiles.push({
+                                name: String(file.name),
+                                type: String(file.type),
+                                size: Number(file.size),
+                                url: String(url)
+                            });
+                        }
+                    } catch (uploadErr) {
+                        console.error("Upload failed for equipment:", uploadErr);
+                        throw new Error(`Upload falhou: ${uploadErr.message}`);
+                    }
+                }
+            }
+
+            const cleanData = JSON.parse(JSON.stringify(data));
+            const docData = {
+                ...cleanData,
+                certificates: uploadedFiles,
                 createdAt: new Date().toISOString()
-            });
-            console.log("Equipment saved with ID:", docRef.id);
+            };
+
+            const docRef = await addDoc(collection(db, 'equipements'), docData);
             return docRef.id;
         } catch (err) {
             console.error("Error adding equipment:", err);
@@ -127,20 +139,24 @@ export const InventoryProvider = ({ children }) => {
     const updateToron = async (id, data, newFiles = []) => {
         try {
             const docRef = doc(db, 'torons', id);
-
             let updatedCertificates = data.certificates || [];
 
             if (newFiles.length > 0) {
                 console.log("Uploading additional files...");
                 for (const file of newFiles) {
-                    const url = await uploadCertificate(file, file.name);
-                    if (url) {
-                        updatedCertificates.push({
-                            name: String(file.name),
-                            type: String(file.type),
-                            size: Number(file.size),
-                            url: String(url)
-                        });
+                    try {
+                        const url = await uploadCertificate(file, file.name);
+                        if (url) {
+                            updatedCertificates.push({
+                                name: String(file.name),
+                                type: String(file.type),
+                                size: Number(file.size),
+                                url: String(url)
+                            });
+                        }
+                    } catch (uploadErr) {
+                        console.error("Upload failed during update:", uploadErr);
+                        throw new Error(`Upload falhou: ${uploadErr.message}`);
                     }
                 }
             }
@@ -156,29 +172,58 @@ export const InventoryProvider = ({ children }) => {
         }
     };
 
-    const updateEquipment = async (id, data) => {
-        const docRef = doc(db, 'equipements', id);
-        await updateDoc(docRef, data);
-    };
-
-    const deleteItem = async (type, id) => {
+    const updateEquipment = async (id, data, newFiles = []) => {
         try {
-            if (type === 'toron') {
-                // Get the toron data first to find certificate URLs
-                const docRef = doc(db, 'torons', id);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.certificates && data.certificates.length > 0) {
-                        const urls = data.certificates.map(c => c.url);
-                        console.log("Deleting associated files:", urls);
-                        await deleteFiles(urls);
+            const docRef = doc(db, 'equipements', id);
+            let updatedCertificates = data.certificates || [];
+
+            if (newFiles.length > 0) {
+                console.log("Uploading additional files...");
+                for (const file of newFiles) {
+                    try {
+                        const url = await uploadCertificate(file, file.name);
+                        if (url) {
+                            updatedCertificates.push({
+                                name: String(file.name),
+                                type: String(file.type),
+                                size: Number(file.size),
+                                url: String(url)
+                            });
+                        }
+                    } catch (uploadErr) {
+                        console.error("Upload failed during update:", uploadErr);
+                        throw new Error(`Upload falhou: ${uploadErr.message}`);
                     }
                 }
             }
 
+            const cleanData = JSON.parse(JSON.stringify(data));
+            await updateDoc(docRef, {
+                ...cleanData,
+                certificates: updatedCertificates
+            });
+        } catch (err) {
+            console.error("Error updating equipment:", err);
+            throw err;
+        }
+    };
+
+    const deleteItem = async (type, id) => {
+        try {
             const collectionName = type === 'toron' ? 'torons' : 'equipements';
-            await deleteDoc(doc(db, collectionName, id));
+            const docRef = doc(db, collectionName, id);
+
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.certificates && data.certificates.length > 0) {
+                    const urls = data.certificates.map(c => c.url);
+                    console.log(`Deleting associated files for ${type}:`, urls);
+                    await deleteFiles(urls);
+                }
+            }
+
+            await deleteDoc(docRef);
         } catch (err) {
             console.error("Error deleting item:", err);
             throw err;
