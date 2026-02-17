@@ -81,7 +81,7 @@ const ScanGlobal = () => {
                 </div>
 
                 {/* Scanner Area */}
-                <div className="relative bg-black overflow-hidden">
+                <div className="relative bg-black">
                     <Scanner
                         onScan={handleScan}
                         onError={handleError}
@@ -89,24 +89,10 @@ const ScanGlobal = () => {
                             facingMode: 'environment'
                         }}
                         components={{
-                            tracker: true,
+                            audio: false,
+                            finder: true,
                         }}
-                        styles={{
-                            container: { 
-                                width: '100%',
-                                position: 'relative',
-                                paddingTop: '100%' // 1:1 aspect ratio
-                            },
-                            video: { 
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover'
-                            },
-                            finderBorder: 50
-                        }}
+                        allowMultiple={false}
                         scanDelay={500}
                     />
                 </div>
