@@ -81,32 +81,34 @@ const ScanGlobal = () => {
                 </div>
 
                 {/* Scanner Area */}
-                <div className="relative bg-black">
+                <div className="relative bg-black overflow-hidden">
                     <Scanner
                         onScan={handleScan}
                         onError={handleError}
                         constraints={{
                             facingMode: 'environment'
                         }}
-                        styles={{
-                            container: { width: '100%' },
-                            video: { width: '100%', height: 'auto' }
+                        components={{
+                            tracker: true,
                         }}
+                        styles={{
+                            container: { 
+                                width: '100%',
+                                position: 'relative',
+                                paddingTop: '100%' // 1:1 aspect ratio
+                            },
+                            video: { 
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                            },
+                            finderBorder: 50
+                        }}
+                        scanDelay={500}
                     />
-
-                    {/* Corner Brackets Overlay */}
-                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                        <div className="relative w-64 h-64">
-                            {/* Top Left */}
-                            <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-white"></div>
-                            {/* Top Right */}
-                            <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-white"></div>
-                            {/* Bottom Left */}
-                            <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-white"></div>
-                            {/* Bottom Right */}
-                            <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-white"></div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Instructions */}
