@@ -219,7 +219,12 @@ export const InventoryProvider = ({ children }) => {
                 if (data.certificates && data.certificates.length > 0) {
                     const urls = data.certificates.map(c => c.url);
                     console.log(`Deleting associated files for ${type}:`, urls);
-                    await deleteFiles(urls);
+                    try {
+                        await deleteFiles(urls);
+                    } catch (fileErr) {
+                        console.error("Warning: Failed to delete associated files:", fileErr);
+                        // Continue to delete the document even if file deletion fails
+                    }
                 }
             }
 

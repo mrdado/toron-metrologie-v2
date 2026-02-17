@@ -65,7 +65,7 @@ const EditToron = () => {
 
         setLoading(true);
         try {
-            await deleteItem('torons', id);
+            await deleteItem('toron', id);
             alert("Toron supprimé avec succès");
             navigate('/torons/edit');
         } catch (error) {
