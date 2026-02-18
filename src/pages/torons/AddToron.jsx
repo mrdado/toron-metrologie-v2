@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { Save, Upload } from 'lucide-react';
+import { Save, Upload, AlertCircle } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -12,6 +12,7 @@ const AddToron = () => {
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(!!id);
     const [createdId, setCreatedId] = useState(null);
+    const [errors, setErrors] = useState({});
 
     const [formData, setFormData] = useState({
         fournisseur: '',
@@ -56,6 +57,7 @@ const AddToron = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Form submitted!", formData);
+        setErrors({});
         setLoading(true);
         try {
             if (id) {
@@ -71,6 +73,7 @@ const AddToron = () => {
             }
         } catch (error) {
             console.error("Error in handleSubmit:", error);
+            setErrors({ submit: error.message });
             alert("Erreur : " + error.message);
         } finally {
             setLoading(false);
@@ -119,9 +122,19 @@ const AddToron = () => {
         <div className="max-w-2xl mx-auto">
             {/* Header */}
             <div className="mb-6 text-center">
-                <div className="inline-block bg-gradient-to-r from-purple-500 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-md">
+                <div className="inline-block bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-md">
                     <h1 className="text-2xl font-bold">{id ? 'Éditer Toron' : 'Ajouter un Toron'}</h1>
                 </div>
+            </div>
+
+            {/* Error Alert with ARIA live region */}
+            <div role="alert" aria-live="polite" aria-atomic="true">
+                {errors.submit && (
+                    <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4 flex items-center gap-3 border border-red-100">
+                        <AlertCircle size={20} />
+                        <span className="text-sm font-medium">{errors.submit}</span>
+                    </div>
+                )}
             </div>
 
             {/* Form */}

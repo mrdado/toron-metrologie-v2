@@ -10,7 +10,7 @@ const Home = () => {
 
     // Set page title for accessibility and SEO
     useEffect(() => {
-        document.title = 'Accueil - Toron Metrologie';
+        document.title = 'Accueil - IPS TestLAB';
         trackPageView('Home');
     }, []);
 
@@ -100,20 +100,18 @@ const Home = () => {
                         <ChevronRight size={20} className="management-arrow" />
                     </Link>
 
-                    {expiredCount > 0 && (
-                        <Link
-                            to="/equipements/edit?filter=expired"
-                            className="management-link management-link-alert"
-                            aria-label={`Voir les ${expiredCount} équipements avec calibration expirée`}
-                            onClick={() => trackNavigation('/equipements/edit?filter=expired', 'Calibrations Expirées')}
-                        >
-                            <span className="flex items-center gap-2">
-                                <AlertCircle size={18} />
-                                Calibrations Expirées ({expiredCount})
-                            </span>
-                            <ChevronRight size={20} className="management-arrow" />
-                        </Link>
-                    )}
+                    <Link
+                        to="/equipements/edit?filter=expired"
+                        className={`management-link ${expiredCount > 0 ? 'management-link-alert' : ''}`}
+                        aria-label={expiredCount > 0 ? `Voir les ${expiredCount} équipements avec calibration expirée` : 'Voir tous les équipements'}
+                        onClick={() => trackNavigation('/equipements/edit?filter=expired', 'Calibrations Expirées')}
+                    >
+                        <span className="flex items-center gap-2">
+                            {expiredCount > 0 && <AlertCircle size={18} />}
+                            Calibrations Expirées {expiredCount > 0 ? `(${expiredCount})` : '(0)'}
+                        </span>
+                        <ChevronRight size={20} className="management-arrow" />
+                    </Link>
                 </div>
             </div>
         </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Home } from 'lucide-react';
+import freyssinetLogo from '../../assets/Freyssinet logo.png';
 
 const Layout = ({ children }) => {
     const location = useLocation();
@@ -21,12 +22,15 @@ const Layout = ({ children }) => {
                                 <ChevronLeft size={24} />
                             </button>
                         )}
-                        <Link to="/" className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-indigo-500/30 transition-shadow">
-                                <span className="text-white font-bold text-lg">T</span>
-                            </div>
-                            <h1 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-indigo-900 bg-clip-text text-transparent font-outfit tracking-tight">
-                                Toron Metrologie
+                        <Link to="/" className="flex items-center gap-4 group">
+                            <img 
+                                src={freyssinetLogo} 
+                                alt="Freyssinet Logo" 
+                                style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+                                className="shadow-sm group-hover:shadow-md transition-shadow"
+                            />
+                            <h1 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-indigo-900 bg-clip-text text-transparent tracking-tight">
+                                IPS TestLAB
                             </h1>
                         </Link>
                     </div>
@@ -42,7 +46,7 @@ const Layout = ({ children }) => {
             </main>
 
             <footer className="py-8 text-center text-slate-500 text-sm font-medium">
-                <p>© 2026 Toron Metrologie • Système de Gestion Premium</p>
+                <p>© 2026 IPS TestLAB • Système de Gestion Premium</p>
             </footer>
         </div>
     );

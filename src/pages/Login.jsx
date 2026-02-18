@@ -30,13 +30,13 @@ const Login = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-main)' }}>
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+            <div className="w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100" style={{ maxWidth: '400px' }}>
                 <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-8 text-center">
                     <div className="mx-auto w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center mb-4 shadow-lg transform rotate-3">
                         <Lock className="text-white" size={32} />
                     </div>
                     <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Accès Sécurisé</h2>
-                    <p className="text-slate-400">Toron Metrologie Inventory</p>
+                    <p className="text-slate-400">IPS TestLAB Inventory</p>
                 </div>
 
                 <div className="p-8">

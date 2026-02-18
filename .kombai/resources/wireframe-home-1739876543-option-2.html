@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe Home - Option 2 (Balanced)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            background: #f5f5f5;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border: 3px solid #666;
+        }
+        h1 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px dashed #666;
+            padding-bottom: 12px;
+        }
+        .badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #4CAF50;
+            color: white;
+            padding: 3px 7px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            z-index: 10;
+        }
+        .badge-new { background: #FF9800; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #666;
+            background: #fafafa;
+            margin-bottom: 15px;
+        }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        .big-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .stat-card {
+            border: 2px solid #999;
+            padding: 15px;
+            background: #fff;
+        }
+        .stat-big {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-desc {
+            font-size: 12px;
+            color: #666;
+        }
+        .quick-action {
+            border: 2px solid #999;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+        }
+        .quick-icon {
+            width: 48px;
+            height: 48px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        .quick-text {
+            flex: 1;
+        }
+        .recent-box {
+            border: 2px solid #999;
+            padding: 12px;
+            margin: 10px 0;
+            background: #fafafa;
+        }
+        .recent-title {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .recent-item {
+            padding: 8px;
+            border-left: 3px solid #999;
+            margin: 6px 0;
+            background: white;
+        }
+        .note {
+            background: #FFEB3B;
+            border: 2px dashed #FDD835;
+            padding: 10px;
+            margin: 15px 0;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Option 2: Balanced with Insights</h1>
+        
+        <div class="note">
+            <strong>Approach:</strong> Enhanced dashboard with bigger stats cards and recent activity feed. Adds context and insights while maintaining familiar structure.
+        </div>
+
+        <!-- Header -->
+        <div style="position: relative;">
+            <span class="badge">[REUSE] HomeLayout</span>
+            <div class="header">
+                <div class="logo-area">
+                    <div class="logo-box">LOGO</div>
+                    <strong>IPS TestLAB</strong>
+                </div>
+                <div style="width: 24px; height: 24px; border: 2px solid #666; border-radius: 50%;">[X]</div>
+            </div>
+        </div>
+
+        <!-- Big Stats Cards -->
+        <div style="position: relative;">
+            <span class="badge badge-new">[NEW] StatCards</span>
+            <div class="big-stats">
+                <div class="stat-card">
+                    <div class="stat-big">5</div>
+                    <div class="stat-desc">Total Items</div>
+                    <div style="font-size: 10px; color: #999; margin-top: 3px;">2 Torons + 3 Équip.</div>
+                </div>
+                <div class="stat-card" style="border-color: #DC2626; background: #FEE2E2;">
+                    <div class="stat-big" style="color: #DC2626;">2</div>
+                    <div class="stat-desc">⚠️ Expiré</div>
+                    <div style="font-size: 10px; color: #DC2626; margin-top: 3px;">Action requise</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div style="position: relative;">
+            <span class="badge">[REUSE] Button</span>
+            <div class="quick-action" style="border-color: #4F7FFF; background: #E0ECFF;">
+                <div class="quick-icon" style="border-color: #4F7FFF;">[QR]</div>
+                <div class="quick-text">
+                    <div style="font-weight: bold; font-size: 16px;">Scanner QR</div>
+                    <div style="font-size: 11px;">Identifier un item</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="position: relative;">
+            <span class="badge">[REUSE] Button</span>
+            <div class="quick-action">
+                <div class="quick-icon">[+]</div>
+                <div class="quick-text">
+                    <div style="font-weight: bold;">Ajouter Toron</div>
+                    <div style="font-size: 11px; color: #999;">2 existants</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="position: relative;">
+            <span class="badge">[REUSE] Button</span>
+            <div class="quick-action">
+                <div class="quick-icon">[+]</div>
+                <div class="quick-text">
+                    <div style="font-weight: bold;">Ajouter Équipement</div>
+                    <div style="font-size: 11px; color: #999;">3 existants</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div style="position: relative; margin-top: 15px;">
+            <span class="badge badge-new">[NEW] RecentActivity</span>
+            <div class="recent-box">
+                <div class="recent-title">Activité Récente</div>
+                <div class="recent-item">
+                    <div style="font-weight: bold; font-size: 12px;">Gtm - Presse</div>
+                    <div style="font-size: 10px; color: #999;">Expire: 2026-02-17</div>
+                </div>
+                <div class="recent-item" style="border-color: #DC2626;">
+                    <div style="font-weight: bold; font-size: 12px; color: #DC2626;">1234 - Déplacement</div>
+                    <div style="font-size: 10px; color: #DC2626;">Expiré!</div>
+                </div>
+                <div style="text-align: center; margin-top: 8px;">
+                    <div style="font-size: 11px; color: #4F7FFF; text-decoration: underline;">Voir tout ></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="position: relative; margin-top: 25px;">
+            <span class="badge">[REUSE] Footer</span>
+            <div style="text-align: center; color: #999; font-size: 11px; padding-top: 15px; border-top: 2px dashed #ccc;">
+                © 2026 IPS TestLAB
+            </div>
+        </div>
+    </div>
+</body>
+</html>

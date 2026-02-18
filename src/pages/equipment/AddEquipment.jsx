@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { Save, ArrowLeft, Upload } from 'lucide-react';
+import { Save, ArrowLeft, Upload, AlertCircle } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -13,6 +13,7 @@ const AddEquipment = () => {
     const [fetching, setFetching] = useState(!!id);
     const [createdId, setCreatedId] = useState(null);
     const [files, setFiles] = useState([]);
+    const [errors, setErrors] = useState({});
 
     const [formData, setFormData] = useState({
         nom: '',
@@ -52,6 +53,7 @@ const AddEquipment = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Equipment form submitted!", formData);
+        setErrors({});
         setLoading(true);
         try {
             if (id) {
@@ -67,6 +69,7 @@ const AddEquipment = () => {
             }
         } catch (error) {
             console.error("Error in handleSubmit:", error);
+            setErrors({ submit: error.message });
             alert("Erreur : " + error.message);
         } finally {
             setLoading(false);
@@ -114,9 +117,19 @@ const AddEquipment = () => {
         <div className="max-w-2xl mx-auto">
             {/* Header */}
             <div className="mb-6 text-center">
-                <div className="inline-block bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-4 rounded-2xl shadow-md">
+                <div className="inline-block bg-gradient-to-r from-indigo-600 to-teal-600 text-white px-8 py-4 rounded-2xl shadow-md">
                     <h1 className="text-2xl font-bold">{id ? 'Éditer Équipement' : 'Ajouter un Équipement'}</h1>
                 </div>
+            </div>
+
+            {/* Error Alert with ARIA live region */}
+            <div role="alert" aria-live="polite" aria-atomic="true">
+                {errors.submit && (
+                    <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4 flex items-center gap-3 border border-red-100">
+                        <AlertCircle size={20} />
+                        <span className="text-sm font-medium">{errors.submit}</span>
+                    </div>
+                )}
             </div>
 
             {/* Form */}
@@ -169,7 +182,12 @@ const AddEquipment = () => {
                         className="form-input"
                         value={formData.dateCalibration}
                         onChange={handleChange}
+                        placeholder="AAAA-MM-JJ"
+                        aria-describedby="calibration-hint"
                     />
+                    <p id="calibration-hint" className="text-xs text-gray-500 mt-1">
+                        Format: AAAA-MM-JJ
+                    </p>
                 </div>
 
                 {/* Date d'expiration */}
@@ -181,7 +199,12 @@ const AddEquipment = () => {
                         className="form-input"
                         value={formData.dateExpiration}
                         onChange={handleChange}
+                        placeholder="AAAA-MM-JJ"
+                        aria-describedby="expiration-hint"
                     />
+                    <p id="expiration-hint" className="text-xs text-gray-500 mt-1">
+                        Format: AAAA-MM-JJ
+                    </p>
                 </div>
 
                 {/* Étalonnage */}

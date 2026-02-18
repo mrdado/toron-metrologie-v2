@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe Home - Option 1 (Conservative)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            background: #f5f5f5;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border: 3px solid #666;
+        }
+        h1 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px dashed #666;
+            padding-bottom: 12px;
+        }
+        .badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #4CAF50;
+            color: white;
+            padding: 3px 7px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            z-index: 10;
+        }
+        .badge-new { background: #FF9800; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #666;
+            background: #fafafa;
+            margin-bottom: 15px;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        .stats-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .stat-box {
+            flex: 1;
+            border: 2px solid #999;
+            padding: 10px;
+            text-align: center;
+            background: #fff;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 10px;
+            color: #666;
+        }
+        .scanner-btn {
+            border: 3px solid #4F7FFF;
+            background: #E0ECFF;
+            padding: 30px;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .scanner-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            border: 3px solid #4F7FFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .action-card {
+            border: 2px solid #999;
+            padding: 15px;
+            text-align: center;
+            background: white;
+        }
+        .action-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .mgmt-link {
+            border: 2px solid #999;
+            padding: 12px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+        }
+        .note {
+            background: #FFEB3B;
+            border: 2px dashed #FDD835;
+            padding: 10px;
+            margin: 15px 0;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Option 1: Conservative Layout</h1>
+        
+        <div class="note">
+            <strong>Approach:</strong> Minimal changes. Refines current structure with improved spacing and visual hierarchy. Maximum component reuse.
+        </div>
+
+        <!-- Header -->
+        <div style="position: relative;">
+            <span class="badge">[REUSE] HomeLayout</span>
+            <div class="header">
+                <div class="logo-area">
+                    <div class="logo-box">LOGO</div>
+                    <strong>IPS TestLAB</strong>
+                </div>
+                <div style="width: 24px; height: 24px; border: 2px solid #666; border-radius: 50%;">[X]</div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div style="position: relative;">
+            <span class="badge">[REUSE] MinimalStats</span>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">Torons</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Équip.</div>
+                </div>
+                <div class="stat-box" style="border-color: #DC2626; background: #FEE2E2;">
+                    <div class="stat-number" style="color: #DC2626;">2</div>
+                    <div class="stat-label">Exp.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scanner Button -->
+        <div style="position: relative;">
+            <span class="badge">[REUSE] Scanner</span>
+            <div class="scanner-btn">
+                <div class="scanner-icon">[QR]</div>
+                <div style="font-size: 18px; font-weight: bold;">Scanner QR Code</div>
+                <div style="font-size: 12px;">Appuyez pour démarrer</div>
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div style="position: relative;">
+            <span class="badge">[REUSE] Actions</span>
+            <div class="action-grid">
+                <div class="action-card">
+                    <div class="action-icon">[+]</div>
+                    <div style="font-weight: bold;">Nouveau Toron</div>
+                    <div style="font-size: 11px; color: #999;">2 total</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">[+]</div>
+                    <div style="font-weight: bold;">Nouvel Équipement</div>
+                    <div style="font-size: 11px; color: #999;">3 total</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Links -->
+        <div style="border-top: 2px dashed #999; padding-top: 15px; margin-top: 10px;">
+            <div style="position: relative;">
+                <span class="badge">[REUSE] Links</span>
+                <div class="mgmt-link">
+                    <div>Gérer Torons</div>
+                    <div>[>]</div>
+                </div>
+                <div class="mgmt-link">
+                    <div>Gérer Équipements</div>
+                    <div>[>]</div>
+                </div>
+                <div class="mgmt-link" style="border-color: #DC2626; background: #FEE2E2;">
+                    <div style="color: #DC2626;">⚠️ Calibrations Expirées (2)</div>
+                    <div>[>]</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="position: relative; margin-top: 25px;">
+            <span class="badge">[REUSE] Footer</span>
+            <div style="text-align: center; color: #999; font-size: 11px; padding-top: 15px; border-top: 2px dashed #ccc;">
+                © 2026 IPS TestLAB
+            </div>
+        </div>
+    </div>
+</body>
+</html>

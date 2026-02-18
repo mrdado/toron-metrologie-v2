@@ -120,11 +120,11 @@ const ListEquipment = () => {
         <div className="pb-8">
             {/* Action Bar */}
             <div className="flex items-center justify-end gap-2 mb-6">
-                <button onClick={handleExport} className="btn btn-outline btn-sm">
+                <button onClick={handleExport} className="btn btn-equipment btn-sm">
                     <FileSpreadsheet size={18} />
                     Exporter
                 </button>
-                <button onClick={handleImportClick} className="btn btn-dark btn-sm">
+                <button onClick={handleImportClick} className="btn btn-outline btn-sm">
                     <Upload size={18} />
                     Importer
                 </button>
@@ -154,6 +154,7 @@ const ListEquipment = () => {
                             placeholder="Rechercher par nom ou numéro de série..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            disabled={loading}
                             className="form-input pl-10 pr-10 w-full"
                         />
                         {searchTerm && (
