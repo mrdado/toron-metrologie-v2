@@ -93,10 +93,10 @@ const ListEquipment = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-8">
-            {/* Top Bar */}
-            <div className="bg-white p-4 flex items-center justify-between gap-4 shadow-sm">
-                <button onClick={() => navigate('/')} className="icon-btn">
+        <div className="pb-8">
+            {/* Action Bar */}
+            <div className="flex items-center justify-between gap-4 mb-6">
+                <button onClick={() => navigate(-1)} className="icon-btn">
                     <ArrowLeft size={24} />
                 </button>
 
@@ -120,12 +120,14 @@ const ListEquipment = () => {
             </div>
 
             {/* Header */}
-            <div className="page-header page-header-equipment" style={{ background: '#14B8A6' }}>
-                Liste des Équipements
+            <div className="mb-6 text-center">
+                <div className="inline-block bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-4 rounded-2xl shadow-md">
+                    <h1 className="text-2xl font-bold">Liste des Équipements</h1>
+                </div>
             </div>
 
             {/* Content */}
-            <div className="p-4 space-y-4">
+            <div className="space-y-4">
                 {loading && (
                     <div className="text-center py-12 text-gray-400">
                         Chargement...

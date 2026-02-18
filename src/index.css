@@ -311,11 +311,11 @@ h6 {
 .form-input:focus {
   outline: none;
   border-color: var(--toron-primary);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
 }
 
 .form-input::placeholder {
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .form-input:disabled,

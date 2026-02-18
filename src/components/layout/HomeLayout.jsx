@@ -54,7 +54,7 @@ const HomeLayout = ({ children, showStats = false, statsData = {} }) => {
                 {children}
             </main>
 
-            <footer className="py-8 text-center text-slate-400 text-sm font-medium">
+            <footer className="py-8 text-center text-slate-500 text-sm font-medium">
                 <p>© 2026 Toron Metrologie • Système de Gestion Premium</p>
             </footer>
         </div>

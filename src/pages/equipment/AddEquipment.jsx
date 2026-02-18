@@ -75,7 +75,7 @@ const AddEquipment = () => {
 
     if (fetching) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center">
                 <p className="text-gray-400">Chargement...</p>
             </div>
         );
@@ -83,7 +83,7 @@ const AddEquipment = () => {
 
     if (createdId) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+            <div className="min-h-screen flex items-center justify-center p-4">
                 <div className="card max-w-md w-full text-center space-y-4">
                     <div className="text-green-600 text-5xl mb-4">✓</div>
                     <h2 className="text-2xl font-bold">Équipement Créé !</h2>
@@ -111,24 +111,16 @@ const AddEquipment = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Top Link */}
-            {!id && (
-                <div className="p-4">
-                    <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-                        <ArrowLeft size={20} />
-                        Retour à l'accueil
-                    </Link>
-                </div>
-            )}
-
+        <div className="max-w-2xl mx-auto">
             {/* Header */}
-            <div className="page-header page-header-equipment">
-                {id ? 'Éditer Équipement' : 'Ajouter un Équipement'}
+            <div className="mb-6 text-center">
+                <div className="inline-block bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-4 rounded-2xl shadow-md">
+                    <h1 className="text-2xl font-bold">{id ? 'Éditer Équipement' : 'Ajouter un Équipement'}</h1>
+                </div>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-2xl mx-auto">
+            <form onSubmit={handleSubmit} className="space-y-4">
                 {/* UUID Display (only in edit mode) */}
                 {id && (
                     <div>

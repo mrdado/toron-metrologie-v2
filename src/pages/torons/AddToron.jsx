@@ -79,7 +79,7 @@ const AddToron = () => {
 
     if (fetching) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center">
                 <p className="text-gray-400">Chargement...</p>
             </div>
         );
@@ -87,7 +87,7 @@ const AddToron = () => {
 
     if (createdId) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+            <div className="min-h-screen flex items-center justify-center p-4">
                 <div className="card max-w-md w-full text-center space-y-4">
                     <div className="text-green-600 text-5xl mb-4">✓</div>
                     <h2 className="text-2xl font-bold">Toron Créé !</h2>
@@ -116,14 +116,16 @@ const AddToron = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="max-w-2xl mx-auto">
             {/* Header */}
-            <div className="page-header">
-                {id ? 'Éditer Toron' : 'Ajouter un Toron'}
+            <div className="mb-6 text-center">
+                <div className="inline-block bg-gradient-to-r from-purple-500 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-md">
+                    <h1 className="text-2xl font-bold">{id ? 'Éditer Toron' : 'Ajouter un Toron'}</h1>
+                </div>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-2xl mx-auto">
+            <form onSubmit={handleSubmit} className="space-y-4">
                 {/* UUID Display (only in edit mode) */}
                 {id && (
                     <div>
