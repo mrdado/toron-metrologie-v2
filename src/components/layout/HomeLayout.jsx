@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import MinimalStats from '../ui/MinimalStats';
 import freyssinetLogo from '../../assets/Freyssinet logo.png';
@@ -40,7 +40,7 @@ const HomeLayout = ({ children, showStats = false, statsData = {} }) => {
                             className="p-2 hover:bg-white/50 rounded-full transition-all text-slate-600 hover:text-red-600"
                             aria-label="Se déconnecter du système"
                         >
-                            <LogOut size={24} />
+                            <Power size={24} />
                         </button>
                     </div>
                     
