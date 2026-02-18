@@ -37,7 +37,7 @@ const HomeLayout = ({ children, showStats = false, statsData = {} }) => {
 
                         <button
                             onClick={handleLogout}
-                            className="p-2 hover:bg-white/50 rounded-full transition-all text-slate-600 hover:text-red-600"
+                            className="p-2 hover:bg-white/50 transition-all text-slate-600 hover:text-red-600"
                             aria-label="Se déconnecter du système"
                         >
                             <Power size={24} />
