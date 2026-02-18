@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { ArrowLeft, FileSpreadsheet, Upload, QrCode, Edit, Eye, Search } from 'lucide-react';
+import { FileSpreadsheet, Upload, Edit, Search } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 import EmptyState from '../../components/ui/EmptyState';
@@ -80,28 +80,22 @@ const ListToron = () => {
     return (
         <div className="pb-8">
             {/* Action Bar */}
-            <div className="flex items-center justify-between gap-4 mb-6">
-                <button onClick={() => navigate(-1)} className="icon-btn">
-                    <ArrowLeft size={24} />
+            <div className="flex items-center justify-end gap-2 mb-6">
+                <button onClick={handleExport} className="btn btn-outline btn-sm">
+                    <FileSpreadsheet size={18} />
+                    Exporter
                 </button>
-
-                <div className="flex gap-2">
-                    <button onClick={handleExport} className="btn btn-outline btn-sm flex-1">
-                        <FileSpreadsheet size={18} />
-                        Exportar
-                    </button>
-                    <button onClick={handleImportClick} className="btn btn-dark btn-sm flex-1">
-                        <Upload size={18} />
-                        Importar
-                    </button>
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        className="hidden"
-                        accept=".xlsx, .xls"
-                    />
-                </div>
+                <button onClick={handleImportClick} className="btn btn-dark btn-sm">
+                    <Upload size={18} />
+                    Importer
+                </button>
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                    accept=".xlsx, .xls"
+                />
             </div>
 
             {/* Header */}
@@ -164,7 +158,10 @@ const ListToron = () => {
                 {filteredTorons.map((toron, index) => (
                     <div key={toron.id} className="card card-hover stagger-item">
                         <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
+                            <div 
+                                className="flex-1 cursor-pointer" 
+                                onClick={() => navigate(`/torons/view/${toron.id}`)}
+                            >
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">
                                     {toron.fournisseur}
                                 </h3>
@@ -194,22 +191,16 @@ const ListToron = () => {
                                 </div>
                             </div>
 
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => navigate(`/torons/view/${toron.id}`)}
-                                    className="icon-btn text-blue-600 hover:bg-blue-50"
-                                    title="Voir Détails"
-                                >
-                                    <Eye size={20} />
-                                </button>
-                                <button
-                                    onClick={() => navigate(`/torons/edit/${toron.id}`)}
-                                    className="icon-btn"
-                                    title="Modifier"
-                                >
-                                    <Edit size={20} />
-                                </button>
-                            </div>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/torons/edit/${toron.id}`);
+                                }}
+                                className="icon-btn flex-shrink-0"
+                                title="Modifier"
+                            >
+                                <Edit size={20} />
+                            </button>
                         </div>
                     </div>
                 ))}
