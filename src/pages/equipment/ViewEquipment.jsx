@@ -80,10 +80,10 @@ const ViewEquipment = () => {
     return (
         <div className="min-h-screen bg-gray-50 pb-12">
             {/* Header / Top Bar */}
-            <div className="bg-white p-4 flex items-center justify-between shadow-sm sticky top-0 z-10">
+            <div className="bg-white p-4 flex items-center justify-between shadow-md sticky top-0 z-10 border-b border-gray-100">
                 <button
                     onClick={() => navigate('/equipements/edit')}
-                    className="flex items-center gap-2 text-gray-600 font-medium"
+                    className="flex items-center gap-2 text-gray-600 font-semibold hover:text-gray-900 transition-colors"
                 >
                     <ArrowLeft size={20} />
                     Retour
@@ -99,10 +99,10 @@ const ViewEquipment = () => {
                 </div>
             </div>
 
-            <div className="max-w-xl mx-auto p-4 space-y-6">
+            <div className="max-w-xl mx-auto p-4 space-y-6 mt-2">
                 {/* Info Card */}
-                <div className="card bg-white shadow-md border-t-4 border-teal-500">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                <div className="card bg-white shadow-lg border-t-4 border-teal-500">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
                         Détails de l'Équipement
                     </h2>
 
