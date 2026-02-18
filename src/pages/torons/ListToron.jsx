@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { ArrowLeft, FileSpreadsheet, Upload, QrCode, Edit, Eye } from 'lucide-react';
+import { ArrowLeft, FileSpreadsheet, Upload, QrCode, Edit, Eye, Search } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
+import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import EmptyState from '../../components/ui/EmptyState';
 
 const ListToron = () => {
     const navigate = useNavigate();
@@ -109,22 +111,58 @@ const ListToron = () => {
                 </div>
             </div>
 
+            {/* Search Bar */}
+            {!loading && torons.length > 0 && (
+                <div className="mb-4 space-y-2">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <input
+                            type="text"
+                            placeholder="Rechercher par fournisseur ou identification..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="form-input pl-10 pr-10 w-full"
+                        />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm('')}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                aria-label="Clear search"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                            </button>
+                        )}
+                    </div>
+                    {searchTerm && (
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">
+                                {filteredTorons.length} résultat{filteredTorons.length !== 1 ? 's' : ''} trouvé{filteredTorons.length !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Content */}
             <div className="space-y-4">
-                {loading && (
-                    <div className="text-center py-12 text-gray-400">
-                        Chargement...
-                    </div>
+                {loading && <LoadingSkeleton type="card" count={3} />}
+
+                {!loading && torons.length === 0 && (
+                    <EmptyState type="toron" />
                 )}
 
-                {!loading && filteredTorons.length === 0 && (
-                    <div className="text-center py-12 text-gray-400">
-                        Aucun toron trouvé.
-                    </div>
+                {!loading && torons.length > 0 && filteredTorons.length === 0 && (
+                    <EmptyState 
+                        type="search" 
+                        message="Aucun toron ne correspond à votre recherche"
+                        showAction={false}
+                    />
                 )}
 
-                {filteredTorons.map((toron) => (
-                    <div key={toron.id} className="card card-hover">
+                {filteredTorons.map((toron, index) => (
+                    <div key={toron.id} className="card card-hover stagger-item">
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">

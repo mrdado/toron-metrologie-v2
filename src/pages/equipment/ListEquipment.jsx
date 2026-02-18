@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { ArrowLeft, FileSpreadsheet, Upload, QrCode, Edit, AlertCircle, CheckCircle, Eye } from 'lucide-react';
+import { ArrowLeft, FileSpreadsheet, Upload, QrCode, Edit, AlertCircle, CheckCircle, Eye, Search } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
+import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import EmptyState from '../../components/ui/EmptyState';
 
 const ListEquipment = () => {
     const navigate = useNavigate();
@@ -126,24 +128,60 @@ const ListEquipment = () => {
                 </div>
             </div>
 
+            {/* Search Bar */}
+            {!loading && equipements.length > 0 && (
+                <div className="mb-4 space-y-2">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <input
+                            type="text"
+                            placeholder="Rechercher par nom ou numéro de série..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="form-input pl-10 pr-10 w-full"
+                        />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm('')}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                aria-label="Clear search"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                            </button>
+                        )}
+                    </div>
+                    {searchTerm && (
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">
+                                {filteredEquipments.length} résultat{filteredEquipments.length !== 1 ? 's' : ''} trouvé{filteredEquipments.length !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Content */}
             <div className="space-y-4">
-                {loading && (
-                    <div className="text-center py-12 text-gray-400">
-                        Chargement...
-                    </div>
+                {loading && <LoadingSkeleton type="card" count={3} />}
+
+                {!loading && equipements.length === 0 && (
+                    <EmptyState type="equipment" />
                 )}
 
-                {!loading && filteredEquipments.length === 0 && (
-                    <div className="text-center py-12 text-gray-400">
-                        Aucun équipement trouvé.
-                    </div>
+                {!loading && equipements.length > 0 && filteredEquipments.length === 0 && (
+                    <EmptyState 
+                        type="search" 
+                        message="Aucun équipement ne correspond à votre recherche"
+                        showAction={false}
+                    />
                 )}
 
-                {filteredEquipments.map((equip) => {
+                {filteredEquipments.map((equip, index) => {
                     const status = getStatus(equip.dateExpiration);
                     return (
-                        <div key={equip.id} className="card card-hover">
+                        <div key={equip.id} className="card card-hover stagger-item">
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1">
                                     <h3 className="text-lg font-bold text-gray-900 mb-2">
