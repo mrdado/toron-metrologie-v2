@@ -112,18 +112,10 @@ const ViewEquipment = () => {
                             <p className="font-medium text-gray-900">{equipment?.nom}</p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-xs font-semibold text-gray-400 uppercase">Numéro de Série</p>
-                            <p className="font-medium text-gray-900">{equipment?.numeroSerie || 'N/A'}</p>
-                        </div>
-                        <div className="space-y-1">
                             <p className="text-xs font-semibold text-gray-400 uppercase">Type</p>
                             <span className="badge badge-green inline-block">
                                 {equipment?.type}
                             </span>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-xs font-semibold text-gray-400 uppercase">ID Unique</p>
-                            <p className="text-xs font-mono text-gray-500 truncate">{id}</p>
                         </div>
 
                         <div className="space-y-1">
