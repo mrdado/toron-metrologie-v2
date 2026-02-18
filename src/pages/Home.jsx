@@ -17,10 +17,13 @@ const Home = () => {
     // Calculate expired calibrations
     useEffect(() => {
         const today = new Date();
+        today.setHours(0, 0, 0, 0); // Start of today
+
         const expired = equipements.filter(eq => {
-            if (eq.calibrationDate) {
-                const calibDate = new Date(eq.calibrationDate);
-                return calibDate < today;
+            if (eq.dateExpiration) {
+                const expDate = new Date(eq.dateExpiration);
+                expDate.setHours(0, 0, 0, 0);
+                return expDate < today;
             }
             return false;
         });

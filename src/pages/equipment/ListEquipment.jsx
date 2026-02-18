@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
 import { ArrowLeft, FileSpreadsheet, Upload, QrCode, Edit, AlertCircle, CheckCircle, Eye, Search } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
@@ -8,22 +8,44 @@ import EmptyState from '../../components/ui/EmptyState';
 
 const ListEquipment = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const filterType = queryParams.get('filter');
+
     const { equipements, loading, deleteItem, addEquipment, updateEquipment } = useInventory();
     const [searchTerm, setSearchTerm] = useState('');
     const fileInputRef = React.useRef(null);
 
     const filteredEquipments = useMemo(() => {
-        return equipements.filter(e =>
+        let results = equipements;
+
+        // Apply filter from query params
+        if (filterType === 'expired') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            results = results.filter(e => {
+                if (!e.dateExpiration) return false;
+                const expDate = new Date(e.dateExpiration);
+                expDate.setHours(0, 0, 0, 0);
+                return expDate < today;
+            });
+        }
+
+        // Apply search term
+        return results.filter(e =>
             e.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             e.numeroSerie?.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [equipements, searchTerm]);
+    }, [equipements, searchTerm, filterType]);
 
     const getStatus = (dateExpiration) => {
         if (!dateExpiration) return { label: 'N/A', className: 'badge-gray', icon: AlertCircle };
 
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
         const expDate = new Date(dateExpiration);
+        expDate.setHours(0, 0, 0, 0);
+
         const diffTime = expDate - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -147,7 +169,7 @@ const ListEquipment = () => {
                                 aria-label="Clear search"
                             >
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                    <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                                 </svg>
                             </button>
                         )}
@@ -171,8 +193,8 @@ const ListEquipment = () => {
                 )}
 
                 {!loading && equipements.length > 0 && filteredEquipments.length === 0 && (
-                    <EmptyState 
-                        type="search" 
+                    <EmptyState
+                        type="search"
                         message="Aucun équipement ne correspond à votre recherche"
                         showAction={false}
                     />
