@@ -53,7 +53,7 @@ const Home = () => {
                 <div className="quick-actions-grid">
                     <Link
                         to="/torons/add"
-                        className="quick-action-card"
+                        className="quick-action-card toron-icon"
                         aria-label="Ajouter un nouveau toron au système"
                         onClick={() => trackNavigation('/torons/add', 'Ajouter Toron')}
                     >
@@ -66,7 +66,7 @@ const Home = () => {
 
                     <Link
                         to="/equipements/add"
-                        className="quick-action-card"
+                        className="quick-action-card equipment-icon"
                         aria-label="Ajouter un nouvel équipement au système"
                         onClick={() => trackNavigation('/equipements/add', 'Ajouter Équipement')}
                     >
@@ -82,7 +82,7 @@ const Home = () => {
                 <div className="management-links">
                     <Link
                         to="/torons/edit"
-                        className="management-link"
+                        className="management-link toron-link"
                         aria-label="Voir la liste et gérer les torons existants"
                         onClick={() => trackNavigation('/torons/edit', 'Gérer Torons')}
                     >
@@ -92,7 +92,7 @@ const Home = () => {
 
                     <Link
                         to="/equipements/edit"
-                        className="management-link"
+                        className="management-link equipment-link"
                         aria-label="Voir la liste et gérer les équipements existants"
                         onClick={() => trackNavigation('/equipements/edit', 'Gérer Équipements')}
                     >

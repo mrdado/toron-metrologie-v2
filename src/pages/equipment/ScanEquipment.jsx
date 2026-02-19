@@ -12,13 +12,10 @@ const ScanEquipment = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto text-center space-y-6">
-            <div className="flex items-center gap-4 mb-2">
-                <Button variant="outline" onClick={() => navigate('/')} className="!p-2">
-                    <ArrowLeft size={20} />
-                </Button>
-                <h2 className="text-2xl font-bold">Scanner Équipement</h2>
-            </div>
+        <div className="max-w-2xl mx-auto text-center space-y-6">
+            <h1 className="page-header page-header-scanner">
+                Scanner Équipement
+            </h1>
 
             <p className="text-gray-500">
                 Placez le QR Code de l'équipement devant la caméra.

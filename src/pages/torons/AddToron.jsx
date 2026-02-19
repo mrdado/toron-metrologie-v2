@@ -121,11 +121,9 @@ const AddToron = () => {
     return (
         <div className="max-w-2xl mx-auto">
             {/* Header */}
-            <div className="mb-6 text-center">
-                <div className="inline-block bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-md">
-                    <h1 className="text-2xl font-bold">{id ? 'Éditer Toron' : 'Ajouter un Toron'}</h1>
-                </div>
-            </div>
+            <h1 className="page-header page-header-toron">
+                Ajouter un toron
+            </h1>
 
             {/* Error Alert with ARIA live region */}
             <div role="alert" aria-live="polite" aria-atomic="true">

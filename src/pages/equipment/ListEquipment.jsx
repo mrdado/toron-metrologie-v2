@@ -138,11 +138,9 @@ const ListEquipment = () => {
             </div>
 
             {/* Header */}
-            <div className="mb-6 text-center">
-                <div className="inline-block bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-4 rounded-2xl shadow-md">
-                    <h1 className="text-2xl font-bold">Liste des Équipements</h1>
-                </div>
-            </div>
+            <h1 className="page-header page-header-equipment">
+                Liste des Équipements
+            </h1>
 
             {/* Search Bar */}
             {!loading && equipements.length > 0 && (

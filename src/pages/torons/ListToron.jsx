@@ -99,11 +99,9 @@ const ListToron = () => {
             </div>
 
             {/* Header */}
-            <div className="mb-6 text-center">
-                <div className="inline-block bg-gradient-to-r from-purple-500 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-md">
-                    <h1 className="text-2xl font-bold">Liste des Torons</h1>
-                </div>
-            </div>
+            <h1 className="page-header page-header-toron">
+                Liste des Torons
+            </h1>
 
             {/* Search Bar */}
             {!loading && torons.length > 0 && (

@@ -101,7 +101,7 @@ const ViewToron = () => {
 
             <div className="max-w-xl mx-auto p-4 space-y-6 mt-2">
                 {/* Info Card */}
-                <div className="card bg-white shadow-lg border-t-4 border-purple-600">
+                <div className="card bg-white shadow-lg" style={{ borderTop: '4px solid var(--toron-primary)' }}>
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
                         Détails du Toron
                     </h2>
@@ -141,24 +141,26 @@ const ViewToron = () => {
                 {/* Certificates Section */}
                 <div className="card bg-white shadow-md">
                     <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <Upload size={20} className="text-blue-600" />
+                        <Upload size={20} style={{ color: 'var(--toron-primary)' }} />
                         Certificats de Qualité
                     </h3>
 
                     {toron?.certificates && toron.certificates.length > 0 ? (
-                        <div className="space-y-3">
-                            {toron.certificates.map((cert, index) => (
-                                <a
-                                    key={index}
-                                    href={cert.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition-all group"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
-                                            <Upload size={20} />
-                                        </div>
+                         <div className="space-y-3">
+                             {toron.certificates.map((cert, index) => (
+                                 <a
+                                     key={index}
+                                     href={cert.url}
+                                     target="_blank"
+                                     rel="noopener noreferrer"
+                                     className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 transition-all group"
+                                     onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--toron-light)'; e.currentTarget.style.borderColor = 'var(--toron-primary)'; }}
+                                     onMouseLeave={(e) => { e.currentTarget.style.background = '#F9FAFB'; e.currentTarget.style.borderColor = '#F3F4F6'; }}
+                                 >
+                                     <div className="flex items-center gap-3">
+                                         <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--toron-light)', color: 'var(--toron-primary)' }}>
+                                             <Upload size={20} />
+                                         </div>
                                         <div className="flex flex-col overflow-hidden">
                                             <span className="text-sm font-bold text-gray-900 truncate max-w-[200px]">
                                                 {cert.name}
@@ -168,7 +170,7 @@ const ViewToron = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    <Download size={20} className="text-gray-400 group-hover:text-blue-600" />
+                                     <Download size={20} className="text-gray-400 group-hover:text-opacity-80" style={{ color: 'var(--text-muted)' }} />
                                 </a>
                             ))}
                         </div>

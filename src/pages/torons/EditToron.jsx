@@ -86,24 +86,24 @@ const EditToron = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Top Bar */}
-            <div className="bg-white p-4 flex items-center justify-between shadow-sm">
-                <Link to="/torons/edit" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-                    <ArrowLeft size={20} />
+            <div className="flex items-center justify-between gap-2 mb-6">
+                <Link to="/torons/edit" className="btn btn-outline btn-sm">
+                    <ArrowLeft size={18} />
                     Retour à la liste
                 </Link>
                 <button
                     onClick={() => navigate(`/torons/view/${id}`)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="btn btn-outline btn-sm"
                 >
-                    <QrCode size={20} />
+                    <QrCode size={18} />
                     Voir QR Code
                 </button>
             </div>
 
             {/* Header */}
-            <div className="page-header">
+            <h1 className="page-header page-header-toron">
                 Éditer Toron
-            </div>
+            </h1>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-2xl mx-auto">
@@ -204,11 +204,11 @@ const EditToron = () => {
                     {formData.certificates && formData.certificates.length > 0 && (
                         <div className="space-y-2 mb-4">
                             {formData.certificates.map((cert, index) => (
-                                <div key={index} className="flex items-center justify-between p-2 bg-blue-50 border border-blue-100 rounded-lg">
+                                <div key={index} className="flex items-center justify-between p-2 border rounded-lg" style={{ backgroundColor: 'var(--toron-light)', borderColor: 'var(--toron-primary)' }}>
                                     <div className="flex items-center gap-2 overflow-hidden">
-                                        <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded flex items-center justify-center shrink-0">
-                                            <Upload size={14} />
-                                        </div>
+                                        <div className="w-8 h-8 rounded flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(75, 107, 166, 0.1)', color: 'var(--toron-primary)' }}>
+                                             <Upload size={14} />
+                                         </div>
                                         <span className="text-xs font-medium truncate">{cert.name}</span>
                                     </div>
                                     <button
