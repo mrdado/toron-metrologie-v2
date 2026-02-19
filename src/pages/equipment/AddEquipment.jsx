@@ -220,28 +220,26 @@ const AddEquipment = () => {
                 {/* Certificat Upload */}
                 <div>
                     <label className="input-label">Certificats de qualité / Étalonnage</label>
-                    <div className="relative">
-                        <input
-                            type="file"
-                            multiple
-                            accept="image/*,.pdf"
-                            onChange={(e) => setFiles([...e.target.files])}
-                            className="hidden"
-                            id="file-upload"
-                        />
-                        <label
-                            htmlFor="file-upload"
-                            className="btn btn-outline cursor-pointer"
-                        >
-                            <Upload size={20} />
-                            Télécharger des fichiers
-                        </label>
-                        {files.length > 0 && (
-                            <p className="text-sm text-gray-600 mt-2">
-                                {files.length} arquivo(s) selecionado(s)
-                            </p>
-                        )}
-                    </div>
+                    <input
+                        type="file"
+                        multiple
+                        accept="image/*,.pdf"
+                        onChange={(e) => setFiles([...e.target.files])}
+                        className="sr-only"
+                        id="file-upload"
+                    />
+                    <label
+                        htmlFor="file-upload"
+                        className="btn btn-equipment cursor-pointer"
+                    >
+                        <Upload size={20} />
+                        Télécharger des fichiers
+                    </label>
+                    {files.length > 0 && (
+                        <p className="text-sm text-gray-600 mt-2">
+                            {files.length} arquivo(s) selecionado(s)
+                        </p>
+                    )}
                 </div>
 
                 {/* Submit Button */}

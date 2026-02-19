@@ -232,28 +232,26 @@ const AddToron = () => {
                 {!id && (
                     <div>
                         <label className="input-label">Certificat de qualité</label>
-                        <div className="relative">
-                            <input
-                                type="file"
-                                multiple
-                                accept="image/*,.pdf"
-                                onChange={handleFileChange}
-                                className="hidden"
-                                id="file-upload"
-                            />
-                            <label
-                                htmlFor="file-upload"
-                                className="btn btn-outline cursor-pointer"
-                            >
-                                <Upload size={20} />
-                                Télécharger des fichiers
-                            </label>
-                            {files.length > 0 && (
-                                <p className="text-sm text-gray-600 mt-2">
-                                    {files.length} fichier(s) sélectionné(s)
-                                </p>
-                            )}
-                        </div>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*,.pdf"
+                            onChange={handleFileChange}
+                            className="sr-only"
+                            id="file-upload"
+                        />
+                        <label
+                            htmlFor="file-upload"
+                            className="btn btn-primary cursor-pointer"
+                        >
+                            <Upload size={20} />
+                            Télécharger des fichiers
+                        </label>
+                        {files.length > 0 && (
+                            <p className="text-sm text-gray-600 mt-2">
+                                {files.length} fichier(s) sélectionné(s)
+                            </p>
+                        )}
                     </div>
                 )}
 
