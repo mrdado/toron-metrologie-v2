@@ -4,6 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ArrowLeft, Edit, Download, Share2, Upload } from 'lucide-react';
 import QRCode from 'qrcode';
+import TabNav from '../../components/ui/TabNav';
 
 const ViewToron = () => {
     const { id } = useParams();
@@ -11,6 +12,7 @@ const ViewToron = () => {
     const [toron, setToron] = useState(null);
     const [qrCodeUrl, setQrCodeUrl] = useState('');
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('details');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -77,140 +79,154 @@ const ViewToron = () => {
         );
     }
 
+    const tabs = [
+        { id: 'details', label: 'Détails' },
+        { id: 'certificates', label: 'Certificats' },
+        { id: 'qrcode', label: 'QR Code' }
+    ];
+
     return (
         <div className="min-h-screen bg-gray-50 pb-12">
-            {/* Header / Top Bar */}
-            <div className="bg-white p-4 flex items-center justify-between shadow-md sticky top-0 z-10 border-b border-gray-100">
-                <button
-                    onClick={() => navigate('/torons/edit')}
-                    className="flex items-center gap-2 text-gray-600 font-semibold hover:text-gray-900 transition-colors"
+            {/* Action Bar */}
+            <div className="flex items-center justify-end gap-2 mb-6">
+                <button 
+                    onClick={() => navigate('/torons/edit')} 
+                    className="btn btn-primary btn-sm"
                 >
-                    <ArrowLeft size={20} />
+                    <ArrowLeft size={18} />
                     Retour
                 </button>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => navigate(`/torons/edit/${id}`)}
-                        className="btn btn-outline btn-sm"
-                    >
-                        <Edit size={16} />
-                        Modifier
-                    </button>
-                </div>
+                <button
+                    onClick={() => navigate(`/torons/edit/${id}`)}
+                    className="btn btn-primary btn-sm"
+                >
+                    <Edit size={18} />
+                    Modifier
+                </button>
             </div>
 
-            <div className="max-w-xl mx-auto p-4 space-y-6 mt-2">
-                {/* Info Card */}
-                <div className="card bg-white shadow-lg" style={{ borderTop: '4px solid var(--toron-primary)' }}>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        Détails du Toron
-                    </h2>
+            {/* Header */}
+            <h1 className="page-header page-header-toron">
+                Détails du Toron
+            </h1>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                            <p className="text-xs font-semibold text-gray-400 uppercase">Identification</p>
-                            <p className="font-medium text-gray-900">{toron?.identification}</p>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-xs font-semibold text-gray-400 uppercase">Fournisseur</p>
-                            <p className="font-medium text-gray-900">{toron?.fournisseur}</p>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-xs font-semibold text-gray-400 uppercase">Diamètre</p>
-                            <p className="font-medium text-gray-900">{toron?.diametre}</p>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-xs font-semibold text-gray-400 uppercase">Grade</p>
-                            <p className="font-medium text-gray-900">{toron?.grade}</p>
-                        </div>
-                        <div className="col-span-2 space-y-1">
-                            <p className="text-xs font-semibold text-gray-400 uppercase">Utilisation</p>
-                            <p className="font-medium text-gray-900">{toron?.utilisation}</p>
-                        </div>
-                        {toron?.essais && (
-                            <div className="col-span-2 space-y-1">
-                                <p className="text-xs font-semibold text-gray-400 uppercase">Essais</p>
-                                <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 italic">
-                                    "{toron.essais}"
-                                </p>
+            <div className="max-w-xl mx-auto p-4 mt-2">
+                {/* Tab Navigation */}
+                <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+
+                {/* Tab Content: Details */}
+                {activeTab === 'details' && (
+                    <div className="card bg-white shadow-lg">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <p className="text-xs font-semibold text-gray-400 uppercase">Identification</p>
+                                <p className="font-medium text-gray-900">{toron?.identification}</p>
                             </div>
+                            <div className="space-y-1">
+                                <p className="text-xs font-semibold text-gray-400 uppercase">Fournisseur</p>
+                                <p className="font-medium text-gray-900">{toron?.fournisseur}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-xs font-semibold text-gray-400 uppercase">Diamètre</p>
+                                <p className="font-medium text-gray-900">{toron?.diametre}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-xs font-semibold text-gray-400 uppercase">Grade</p>
+                                <p className="font-medium text-gray-900">{toron?.grade}</p>
+                            </div>
+                            <div className="col-span-2 space-y-1">
+                                <p className="text-xs font-semibold text-gray-400 uppercase">Utilisation</p>
+                                <p className="font-medium text-gray-900">{toron?.utilisation}</p>
+                            </div>
+                            {toron?.essais && (
+                                <div className="col-span-2 space-y-1">
+                                    <p className="text-xs font-semibold text-gray-400 uppercase">Essais</p>
+                                    <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 italic">
+                                        "{toron.essais}"
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Tab Content: Certificates */}
+                {activeTab === 'certificates' && (
+                    <div className="card bg-white shadow-md">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <Upload size={20} style={{ color: 'var(--toron-primary)' }} />
+                            Certificats de Qualité
+                        </h3>
+
+                        {toron?.certificates && toron.certificates.length > 0 ? (
+                            <div className="space-y-3">
+                                {toron.certificates.map((cert, index) => (
+                                    <a
+                                        key={index}
+                                        href={cert.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 transition-all group"
+                                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--toron-light)'; e.currentTarget.style.borderColor = 'var(--toron-primary)'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.background = '#F9FAFB'; e.currentTarget.style.borderColor = '#F3F4F6'; }}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--toron-light)', color: 'var(--toron-primary)' }}>
+                                                <Upload size={20} />
+                                            </div>
+                                            <div className="flex flex-col overflow-hidden">
+                                                <span className="text-sm font-bold text-gray-900 truncate max-w-[200px]">
+                                                    {cert.name}
+                                                </span>
+                                                <span className="text-xs text-gray-500">
+                                                    {(cert.size / 1024).toFixed(1)} KB
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <Download size={20} className="text-gray-400 group-hover:text-opacity-80" style={{ color: 'var(--text-muted)' }} />
+                                    </a>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-center py-6 text-gray-400 italic text-sm">
+                                Aucun certificat joint à ce toron.
+                            </p>
                         )}
                     </div>
-                </div>
+                )}
 
-                {/* Certificates Section */}
-                <div className="card bg-white shadow-md">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <Upload size={20} style={{ color: 'var(--toron-primary)' }} />
-                        Certificats de Qualité
-                    </h3>
-
-                    {toron?.certificates && toron.certificates.length > 0 ? (
-                         <div className="space-y-3">
-                             {toron.certificates.map((cert, index) => (
-                                 <a
-                                     key={index}
-                                     href={cert.url}
-                                     target="_blank"
-                                     rel="noopener noreferrer"
-                                     className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 transition-all group"
-                                     onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--toron-light)'; e.currentTarget.style.borderColor = 'var(--toron-primary)'; }}
-                                     onMouseLeave={(e) => { e.currentTarget.style.background = '#F9FAFB'; e.currentTarget.style.borderColor = '#F3F4F6'; }}
-                                 >
-                                     <div className="flex items-center gap-3">
-                                         <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--toron-light)', color: 'var(--toron-primary)' }}>
-                                             <Upload size={20} />
-                                         </div>
-                                        <div className="flex flex-col overflow-hidden">
-                                            <span className="text-sm font-bold text-gray-900 truncate max-w-[200px]">
-                                                {cert.name}
-                                            </span>
-                                            <span className="text-xs text-gray-500">
-                                                {(cert.size / 1024).toFixed(1)} KB
-                                            </span>
-                                        </div>
-                                    </div>
-                                     <Download size={20} className="text-gray-400 group-hover:text-opacity-80" style={{ color: 'var(--text-muted)' }} />
-                                </a>
-                            ))}
+                {/* Tab Content: QR Code */}
+                {activeTab === 'qrcode' && (
+                    <div className="card bg-white shadow-md text-center">
+                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">
+                            Identification QR Code
+                        </h3>
+                        <div className="bg-white p-6 rounded-2xl border-2 border-gray-50 inline-block mb-4 shadow-sm">
+                            <img
+                                src={qrCodeUrl}
+                                alt="QR Code"
+                                className="w-48 h-48 mx-auto"
+                            />
                         </div>
-                    ) : (
-                        <p className="text-center py-6 text-gray-400 italic text-sm">
-                            Aucun certificat joint à ce toron.
-                        </p>
-                    )}
-                </div>
 
-                {/* QR Code Section */}
-                <div className="card bg-white shadow-md text-center">
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">
-                        Identification QR Code
-                    </h3>
-                    <div className="bg-white p-6 rounded-2xl border-2 border-gray-50 inline-block mb-4 shadow-sm">
-                        <img
-                            src={qrCodeUrl}
-                            alt="QR Code"
-                            className="w-48 h-48 mx-auto"
-                        />
+                        <div className="flex gap-3 justify-center">
+                            <button
+                                onClick={handleDownload}
+                                className="btn btn-outline btn-sm"
+                            >
+                                <Download size={18} />
+                                Enregistrer
+                            </button>
+                            <button
+                                onClick={handleShare}
+                                className="btn btn-dark btn-sm"
+                            >
+                                <Share2 size={18} />
+                                Partager
+                            </button>
+                        </div>
                     </div>
-
-                    <div className="flex gap-3 justify-center">
-                        <button
-                            onClick={handleDownload}
-                            className="btn btn-outline btn-sm"
-                        >
-                            <Download size={18} />
-                            Enregistrer
-                        </button>
-                        <button
-                            onClick={handleShare}
-                            className="btn btn-dark btn-sm"
-                        >
-                            <Share2 size={18} />
-                            Partager
-                        </button>
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );
