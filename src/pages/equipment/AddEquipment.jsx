@@ -181,11 +181,7 @@ const AddEquipment = () => {
                         value={formData.dateCalibration}
                         onChange={handleChange}
                         placeholder="AAAA-MM-JJ"
-                        aria-describedby="calibration-hint"
                     />
-                    <p id="calibration-hint" className="text-xs text-gray-500 mt-1">
-                        Format: AAAA-MM-JJ
-                    </p>
                 </div>
 
                 {/* Date d'expiration */}
@@ -198,11 +194,7 @@ const AddEquipment = () => {
                         value={formData.dateExpiration}
                         onChange={handleChange}
                         placeholder="AAAA-MM-JJ"
-                        aria-describedby="expiration-hint"
                     />
-                    <p id="expiration-hint" className="text-xs text-gray-500 mt-1">
-                        Format: AAAA-MM-JJ
-                    </p>
                 </div>
 
                 {/* Étalonnage */}

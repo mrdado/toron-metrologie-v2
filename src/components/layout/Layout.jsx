@@ -46,7 +46,7 @@ const Layout = ({ children }) => {
             </main>
 
             <footer className="py-8 text-center text-slate-500 text-sm font-medium">
-                <p>© 2026 IPS TestLAB • Système de Gestion Premium</p>
+                <p>© 2026 IPS TestLAB • Système de Gestion</p>
             </footer>
         </div>
     );
