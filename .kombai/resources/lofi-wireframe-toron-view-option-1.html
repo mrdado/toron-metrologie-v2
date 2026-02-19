@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViewToron - Option 1: Compact with Tabs</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        .wireframe { background: white; border: 2px solid #333; padding: 20px; margin-bottom: 20px; }
+        .header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #999;
+        }
+        .back-btn { border: 2px solid #333; padding: 8px 12px; background: #f0f0f0; cursor: pointer; }
+        .edit-btn { border: 2px solid #333; padding: 8px 12px; background: #f0f0f0; cursor: pointer; }
+        .title { font-size: 24px; font-weight: bold; margin-bottom: 15px; }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ccc;
+        }
+        .tab { 
+            padding: 10px 15px;
+            border: 2px solid #ccc;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tab.active { 
+            background: white;
+            border-bottom: 3px solid #333;
+        }
+        .tab-content { 
+            padding: 15px;
+            border: 2px solid #ccc;
+            background: white;
+        }
+        .detail-row { margin-bottom: 12px; }
+        .detail-label { font-weight: bold; font-size: 12px; color: #666; }
+        .detail-value { font-size: 14px; margin-top: 4px; }
+        .cert-item { 
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #ddd;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .qr-section { text-align: center; }
+        .qr-box { 
+            width: 200px;
+            height: 200px;
+            border: 3px dashed #999;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #666;
+        }
+        .button-group { 
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .btn { 
+            border: 2px solid #333;
+            padding: 10px 15px;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .label-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #4CAF50;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        .new-badge {
+            background: #FF9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="margin-bottom: 20px; font-size: 28px;">Option 1: Compact with Tabs</h1>
+        <p style="margin-bottom: 20px; font-style: italic; color: #666;">A tabbed interface condensing Details, Certificates, and QR Code into switchable sections for better mobile performance.</p>
+
+        <div class="wireframe">
+            <div class="header">
+                <!-- REUSABLE: Button -->
+                <div style="position: relative; display: inline-block;">
+                    <span class="label-badge">[REUSE] Button</span>
+                    <button class="back-btn">← Retour</button>
+                </div>
+                <!-- REUSABLE: Button -->
+                <div style="position: relative; display: inline-block;">
+                    <span class="label-badge">[REUSE] Button</span>
+                    <button class="edit-btn">✎ Modifier</button>
+                </div>
+            </div>
+
+            <h2 class="title">Détails du Toron</h2>
+
+            <!-- NEW COMPONENT: TabNav -->
+            <div style="position: relative; margin-bottom: 20px;">
+                <span class="label-badge new-badge">[NEW] TabNav</span>
+                <div class="tabs">
+                    <div class="tab active">Détails</div>
+                    <div class="tab">Certificats</div>
+                    <div class="tab">QR Code</div>
+                </div>
+            </div>
+
+            <!-- Tab 1: Details (Active) -->
+            <div class="tab-content">
+                <!-- REUSABLE: Card -->
+                <div style="position: relative;">
+                    <span class="label-badge">[REUSE] Card</span>
+                    <div style="padding: 10px;">
+                        <div class="detail-row">
+                            <div class="detail-label">IDENTIFICATION</div>
+                            <div class="detail-value">BT-001-2024</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">FOURNISSEUR</div>
+                            <div class="detail-value">Freyssinet Corp</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">DIAMÈTRE</div>
+                            <div class="detail-value">15.2 mm</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">GRADE</div>
+                            <div class="detail-value">1770 MPa</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">UTILISATION</div>
+                            <div class="detail-value">Précontrainte</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">ESSAIS</div>
+                            <div class="detail-value" style="background: #f5f5f5; padding: 8px; border: 1px solid #ccc; font-style: italic;">
+                                "Test de traction réussi, certification complète"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p style="text-align: center; color: #999; margin-top: 30px; font-size: 12px;">
+                [Tab 2 and Tab 3 content shown on click]
+            </p>
+        </div>
+
+        <div style="background: #e8f4f8; border: 1px solid #4CAF50; padding: 15px; border-radius: 4px; margin-top: 20px;">
+            <h3 style="margin-bottom: 10px; color: #2e7d32;">✓ Key Features:</h3>
+            <ul style="margin-left: 20px; color: #555;">
+                <li>Reduces vertical scrolling on mobile devices</li>
+                <li>Reuses existing Card and Button components</li>
+                <li>New TabNav component for navigation</li>
+                <li>Compact and organized information hierarchy</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

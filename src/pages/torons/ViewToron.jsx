@@ -209,17 +209,19 @@ const ViewToron = () => {
                             />
                         </div>
 
-                        <div className="flex gap-3 justify-center">
+                        <div className="flex gap-4 justify-center w-full" style={{height: '44px'}}>
                             <button
                                 onClick={handleDownload}
-                                className="btn btn-outline btn-sm"
+                                className="btn btn-outline btn-sm flex-1"
+                                style={{height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
                             >
                                 <Download size={18} />
                                 Enregistrer
                             </button>
                             <button
                                 onClick={handleShare}
-                                className="btn btn-dark btn-sm"
+                                className="btn btn-dark btn-sm flex-1"
+                                style={{height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
                             >
                                 <Share2 size={18} />
                                 Partager
