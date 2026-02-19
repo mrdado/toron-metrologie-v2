@@ -12,6 +12,7 @@ const EditToron = () => {
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
     const [files, setFiles] = useState([]);
+    const fileInputRef = React.useRef(null);
 
     const [formData, setFormData] = useState({
         fournisseur: '',
@@ -226,22 +227,23 @@ const EditToron = () => {
                         </div>
                     )}
 
-                    <div className="relative">
+                    <div>
                         <input
                             type="file"
                             multiple
                             accept="image/*,.pdf"
                             onChange={(e) => setFiles([...e.target.files])}
-                            className="hidden"
-                            id="file-upload"
+                            ref={fileInputRef}
+                            style={{display: 'none'}}
                         />
-                        <label
-                            htmlFor="file-upload"
-                            className="btn btn-outline cursor-pointer"
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="btn btn-outline"
                         >
                             <Upload size={20} />
                             {formData.certificates?.length > 0 ? 'Ajouter d\'autres fichiers' : 'Télécharger des fichiers'}
-                        </label>
+                        </button>
                         {files.length > 0 && (
                             <p className="text-sm text-blue-600 mt-2 font-medium">
                                 + {files.length} novo(s) arquivo(s) selecionado(s)
