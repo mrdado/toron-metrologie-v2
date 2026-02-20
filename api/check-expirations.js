@@ -39,6 +39,8 @@ export default async function handler(request, response) {
         const expiringEquipment = [];
         eqSnap.forEach(doc => expiringEquipment.push({ id: doc.id, ...doc.data() }));
 
+        console.log(`Found ${expiringEquipment.length} equipment(s) expiring soon:`, expiringEquipment.map(e => e.nom));
+
         if (expiringEquipment.length === 0) {
             return response.status(200).json({ message: "No expiring equipment found." });
         }
@@ -50,6 +52,8 @@ export default async function handler(request, response) {
 
         const alertedUsers = [];
         userSnap.forEach(doc => alertedUsers.push(doc.data().email));
+
+        console.log(`Found ${alertedUsers.length} user(s) to notify:`, alertedUsers);
 
         if (alertedUsers.length === 0) {
             return response.status(200).json({ message: "No users opted-in." });
