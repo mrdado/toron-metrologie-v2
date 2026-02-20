@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page - Option 3: Full-Screen with Header</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 20px 40px;
+            margin: 16px;
+            border-radius: 16px;
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(90deg, #1E40AF 0%, #3D5A7D 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .header-title {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #4B6BA6 0%, #2D3F5F 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.025em;
+        }
+        .header-subtitle {
+            font-size: 12px;
+            color: #9CA3AF;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: auto;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+        }
+        .intro-section {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .intro-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 12px;
+        }
+        .intro-text {
+            font-size: 16px;
+            color: #6B7280;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+        }
+        .card-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #EEF1F7;
+        }
+        .card-header-accent {
+            height: 3px;
+            width: 60px;
+            background: linear-gradient(90deg, #4B6BA6 0%, #EEF1F7 100%);
+            margin: 0 auto 12px;
+        }
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 4px;
+        }
+        .card-subtitle {
+            font-size: 14px;
+            color: #9CA3AF;
+            font-weight: 500;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            transition: all 0.2s;
+        }
+        .input:focus {
+            outline: none;
+            border-color: #4B6BA6;
+            box-shadow: 0 0 0 3px rgba(75, 107, 166, 0.15);
+        }
+        .button {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(90deg, #4B6BA6 0%, #3D5A7D 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(75, 107, 166, 0.3);
+        }
+        .button-secondary {
+            background: #f3f4f6;
+            color: #1f2937;
+            margin-top: 12px;
+        }
+        .button-secondary:hover {
+            background: #e5e7eb;
+        }
+        .toggle {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 13px;
+            color: #6B7280;
+        }
+        .toggle a {
+            color: #4B6BA6;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #9CA3AF;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="header-logo">🔐</div>
+            <h1 class="header-title">IPS TestLAB</h1>
+            <span class="header-subtitle">Système de Gestion</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="login-container">
+            <!-- Intro Section -->
+            <div class="intro-section">
+                <h2 class="intro-title">Bienvenue</h2>
+                <p class="intro-text">Connectez-vous pour accéder à votre inventaire</p>
+            </div>
+
+            <!-- Login Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-accent"></div>
+                    <h3 class="card-title">Connexion</h3>
+                    <p class="card-subtitle">Entrez vos identifiants</p>
+                </div>
+
+                <form>
+                    <div class="form-group">
+                        <label class="label">📧 Email Professionnel</label>
+                        <input type="email" class="input" placeholder="name@company.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">🔒 Mot de Passe</label>
+                        <input type="password" class="input" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="button">Se Connecter</button>
+                    <button type="button" class="button button-secondary">Créer un Compte</button>
+                </form>
+
+                <div class="toggle">
+                    Besoin d'aide ? <a href="#">Contact Support</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 IPS TestLAB • Système de Gestion</p>
+    </footer>
+</body>
+</html>

@@ -31,6 +31,7 @@ import AddEquipment from './pages/equipment/AddEquipment';
 import EditEquipment from './pages/equipment/EditEquipment';
 import ListEquipment from './pages/equipment/ListEquipment';
 import ViewEquipment from './pages/equipment/ViewEquipment';
+import AdminDashboard from './pages/AdminDashboard';
 
 const HomeWithStats = () => {
   const { torons, equipements } = useInventory();
@@ -155,6 +156,11 @@ function App() {
                 <Layout>
                   <ViewEquipment />
                 </Layout>
+              </PrivateRoute>
+            } />
+            <Route path="/admin" element={
+              <PrivateRoute>
+                <AdminDashboard />
               </PrivateRoute>
             } />
           </Routes>

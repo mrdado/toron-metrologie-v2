@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page - Option 2: Sidebar Layout</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 40%;
+            background: linear-gradient(135deg, #4B6BA6 0%, #2D3F5F 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            color: white;
+        }
+        .sidebar-logo {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 32px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        .sidebar-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            text-align: center;
+            letter-spacing: -0.025em;
+        }
+        .sidebar-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            line-height: 1.6;
+            max-width: 300px;
+        }
+        .form-section {
+            width: 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .form-container {
+            width: 100%;
+            max-width: 380px;
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .form-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+        .form-subtitle {
+            font-size: 14px;
+            color: #6B7280;
+            font-weight: 500;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            transition: all 0.2s;
+        }
+        .input:focus {
+            outline: none;
+            border-color: #4B6BA6;
+            box-shadow: 0 0 0 3px rgba(75, 107, 166, 0.15);
+        }
+        .button {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(90deg, #4B6BA6 0%, #3D5A7D 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(75, 107, 166, 0.3);
+        }
+        .divider {
+            text-align: center;
+            margin: 24px 0;
+            font-size: 13px;
+            color: #d1d5db;
+        }
+        .toggle {
+            text-align: center;
+            font-size: 13px;
+            color: #6B7280;
+        }
+        .toggle a {
+            color: #4B6BA6;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .sidebar, .form-section { width: 100%; padding: 40px 20px; }
+            .sidebar { min-height: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-logo">🔐</div>
+            <h1 class="sidebar-title">IPS TestLAB</h1>
+            <p class="sidebar-text">Système de gestion d'inventaire professionnel pour la métrologie et les essais</p>
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2 class="form-title">Bienvenue</h2>
+                    <p class="form-subtitle">Connectez-vous à votre compte</p>
+                </div>
+
+                <form>
+                    <div class="form-group">
+                        <label class="label">Email Professionnel</label>
+                        <input type="email" class="input" placeholder="name@company.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">Mot de Passe</label>
+                        <input type="password" class="input" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="button">Se Connecter</button>
+
+                    <div class="divider">Nouvelle sur la plateforme ?</div>
+
+                    <button type="button" style="background: #f3f4f6; color: #1f2937; margin-top: 0;" class="button">Créer un Compte</button>
+                </form>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <div class="toggle">
+                        Besoin d'aide ? <a href="#">Support</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
