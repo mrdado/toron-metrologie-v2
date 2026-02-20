@@ -31,9 +31,8 @@ export default async function handler(request, response) {
         const todayStr = today.toISOString().split('T')[0];
         const futureStr = futureDate.toISOString().split('T')[0];
 
-        // 1. Query equipment (bypasses security rules via Admin SDK)
+        // 1. Query equipment (Includes upcoming expirations AND already expired items)
         const eqSnap = await db.collection('equipements')
-            .where('dateExpiration', '>=', todayStr)
             .where('dateExpiration', '<=', futureStr)
             .get();
 
