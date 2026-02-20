@@ -61,6 +61,7 @@ export default async function handler(request, response) {
             service_id: process.env.VITE_EMAILJS_SERVICE_ID,
             template_id: process.env.VITE_EMAILJS_EXPIRATION_TEMPLATE_ID || process.env.VITE_EMAILJS_TEMPLATE_ID,
             user_id: process.env.VITE_EMAILJS_PUBLIC_KEY,
+            accessToken: process.env.EMAILJS_PRIVATE_KEY, // Required for server-side calls
             template_params: {
                 to_emails: alertedUsers.join(','),
                 equipment_count: expiringEquipment.length,
