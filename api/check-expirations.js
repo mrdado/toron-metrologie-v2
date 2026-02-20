@@ -59,35 +59,54 @@ export default async function handler(request, response) {
             return response.status(200).json({ message: "No users opted-in." });
         }
 
-        // 3. Format & Send via EmailJS
+        // 3. Send emails individually for better reliability
         const equipmentList = expiringEquipment.map(e =>
             `- ${e.nom} (S/N: ${e.numeroSerie}) - Exp: ${e.dateExpiration}`
         ).join('\n');
 
-        const emailData = {
-            service_id: process.env.VITE_EMAILJS_SERVICE_ID,
-            template_id: process.env.VITE_EMAILJS_EXPIRATION_TEMPLATE_ID || process.env.VITE_EMAILJS_TEMPLATE_ID,
-            user_id: process.env.VITE_EMAILJS_PUBLIC_KEY,
-            accessToken: process.env.EMAILJS_PRIVATE_KEY, // Required for server-side calls
-            template_params: {
-                to_emails: alertedUsers.join(','),
-                equipment_count: expiringEquipment.length,
-                equipment_details: equipmentList,
-                subject: "🚨 Alerte Expiration Équipements"
+        const results = [];
+        for (const userEmail of alertedUsers) {
+            const emailData = {
+                service_id: process.env.VITE_EMAILJS_SERVICE_ID,
+                template_id: process.env.VITE_EMAILJS_EXPIRATION_TEMPLATE_ID || process.env.VITE_EMAILJS_TEMPLATE_ID,
+                user_id: process.env.VITE_EMAILJS_PUBLIC_KEY,
+                accessToken: process.env.EMAILJS_PRIVATE_KEY,
+                template_params: {
+                    to_email: userEmail,
+                    equipment_count: expiringEquipment.length,
+                    equipment_details: equipmentList,
+                    subject: "🚨 Alerte Expiration Équipements"
+                }
+            };
+
+            console.log(`Sending email to: ${userEmail}...`);
+
+            const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                method: 'POST',
+                body: JSON.stringify(emailData),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!emailResponse.ok) {
+                const errorText = await emailResponse.text();
+                console.error(`EmailJS Error for ${userEmail}:`, errorText);
+                results.push({ email: userEmail, success: false, error: errorText });
+            } else {
+                console.log(`Email sent successfully to ${userEmail}`);
+                results.push({ email: userEmail, success: true });
             }
-        };
-
-        const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-            method: 'POST',
-            body: JSON.stringify(emailData),
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (!emailResponse.ok) {
-            throw new Error(`EmailJS Error: ${await emailResponse.text()}`);
         }
 
-        return response.status(200).json({ success: true, count: expiringEquipment.length });
+        const failedCount = results.filter(r => !r.success).length;
+        if (failedCount > 0) {
+            throw new Error(`Failed to send ${failedCount} out of ${alertedUsers.length} emails.`);
+        }
+
+        return response.status(200).json({
+            success: true,
+            notified: alertedUsers.length,
+            equipment: expiringEquipment.length
+        });
 
     } catch (error) {
         console.error("Cron Error:", error);
