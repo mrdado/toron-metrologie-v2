@@ -96,7 +96,7 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
                 {/* Card Header */}
                 <div className="p-8 text-center border-b border-gray-100">
                     <div className="h-0.5 w-12 bg-gradient-to-r from-blue-600 to-blue-100 mx-auto mb-4"></div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-1 tracking-tight" style={{marginTop: '100px'}}>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1 tracking-tight" style={{marginTop: '24px'}}>
                         {isLogin ? 'Connexion' : 'Créer un compte'}
                     </h2>
                     <p className="text-sm font-medium" style={{color: 'rgb(128, 129, 135)', marginBottom: '30px'}}>
@@ -134,9 +134,9 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
                         )}
 
                         <div>
-                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block mb-2" style={{marginLeft: '20px'}}>Email</label>
+                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block mb-2">Email</label>
                             <div className="relative">
-                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" style={{marginLeft: '20px', width: '408px'}}>
+                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                      <Mail className="text-gray-400" size={18} />
                                  </div>
                                  <input
@@ -146,18 +146,17 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
                                      value={email}
                                      onChange={(e) => setEmail(e.target.value)}
                                      required
-                                     style={{marginLeft: '20px', marginRight: '20px', width: '408px', paddingRight: '16px', overflow: 'visible'}}
                                  />
                              </div>
-                        </div>
+                         </div>
 
                         <div>
                             <div className="flex justify-between items-center mb-2">
-                                <label className="text-xs font-bold text-gray-700 uppercase tracking-wide" style={{marginLeft: '20px'}}>Mot de Passe</label>
-                                {isLogin && <a href="#" className="text-xs text-blue-600 hover:text-blue-700 transition-colors" style={{marginRight: '20px'}}>Oublié ?</a>}
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-wide">Mot de Passe</label>
+                                {isLogin && <a href="#" className="text-xs text-blue-600 hover:text-blue-700 transition-colors">Oublié ?</a>}
                             </div>
                             <div className="relative">
-                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" style={{marginLeft: '20px', width: '408px'}}>
+                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                      <Lock className="text-gray-400" size={18} />
                                  </div>
                                  <input
@@ -167,16 +166,15 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
                                      value={password}
                                      onChange={(e) => setPassword(e.target.value)}
                                      required
-                                     style={{width: '408px', marginLeft: '20px', marginRight: '20px'}}
                                  />
                              </div>
-                        </div>
+                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
                             className="login-submit-btn"
-                            style={{...loginButtonStyle, marginLeft: '20px', marginRight: '20px', width: '408px'}}
+                            style={loginButtonStyle}
                         >
                             {loading ? (
                                 <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}>
