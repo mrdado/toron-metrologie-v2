@@ -89,9 +89,7 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center p-4 overflow-hidden relative">
-            <div className="mesh-background"></div>
-
+        <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100">
             <LoginCard
                 onLogin={handleLogin}
                 onRegister={handleRegister}

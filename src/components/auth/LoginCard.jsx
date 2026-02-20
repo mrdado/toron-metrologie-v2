@@ -1,12 +1,29 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, Mail, Lock, User, Clock, CheckCircle, AlertCircle, ChevronRight } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, User, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import Button from '../ui/Button';
+import freyssinetLogo from '../../assets/Freyssinet logo.png';
 
 const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingApproval }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
+
+    const loginButtonStyle = {
+        width: '100%',
+        marginTop: '24px',
+        padding: '12px 16px',
+        background: 'linear-gradient(90deg, var(--toron-primary) 0%, var(--toron-dark) 100%)',
+        color: 'white',
+        border: 'none',
+        borderRadius: 'var(--radius)',
+        fontWeight: 700,
+        fontSize: '16px',
+        cursor: loading ? 'not-allowed' : 'pointer',
+        transition: 'all 0.2s ease',
+        boxShadow: '0 4px 6px -1px rgba(75, 107, 166, 0.2)',
+        opacity: loading ? 0.7 : 1
+    };
 
     const toggleMode = () => {
         setIsLogin(!isLogin);
@@ -26,29 +43,29 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
 
     if (pendingApproval) {
         return (
-            <div className="glass-card w-full max-w-md p-8 text-center animate-in">
-                <div className="mx-auto w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mb-6 shadow-xl border border-amber-500/30">
-                    <Clock className="text-amber-400 animate-pulse" size={40} />
+            <div className="w-full max-w-md p-8 text-center animate-fade-in">
+                <div className="mx-auto w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mb-6 shadow-md border border-amber-200">
+                    <Clock className="text-amber-500 animate-pulse" size={40} />
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-4 tracking-tight">Compte en attente</h2>
-                <div className="space-y-4 text-slate-300">
-                    <p>Merci pour votre inscription, <span className="text-indigo-400 font-semibold">{fullName || 'utilisateur'}</span> !</p>
-                    <p className="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 text-sm italic">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">Compte en attente</h2>
+                <div className="space-y-4 text-gray-600">
+                    <p>Merci pour votre inscription, <span className="text-blue-600 font-semibold">{fullName || 'utilisateur'}</span> !</p>
+                    <p className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-sm italic">
                         Votre demande d'accès est actuellement en cours d'examen par un administrateur.
                         Vous recevrez l'accès dès que votre compte sera approuvé.
                     </p>
                 </div>
-                <div className="mt-8 pt-8 border-t border-slate-700/50 flex flex-col items-center gap-4">
+                <div className="mt-8 pt-8 border-t border-gray-200 flex flex-col items-center gap-4">
                     <button
                         onClick={onLogout}
-                        className="text-indigo-400 hover:text-indigo-300 text-sm font-bold uppercase tracking-widest flex items-center gap-2 transition-colors"
+                        className="text-blue-600 hover:text-blue-700 text-sm font-bold uppercase tracking-widest flex items-center gap-2 transition-colors"
                     >
                         <LogIn size={16} className="rotate-180" /> Retour à la connexion
                     </button>
                     <div className="flex justify-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                        <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                        <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     </div>
                 </div>
             </div>
@@ -56,116 +73,136 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
     }
 
     return (
-        <div className="glass-card w-full max-w-md overflow-hidden animate-in">
-            {/* Header */}
-            <div className="relative p-8 text-center bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-b border-white/10">
-                <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10 pointer-events-none">
-                    <div className="absolute -top-10 -left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500 rounded-full blur-3xl"></div>
+        <div className="w-full max-w-md animate-fade-in">
+            {/* Branding Section - Outside Card */}
+            <div className="mb-8 text-center">
+                <div className="flex items-center justify-center gap-4 mb-3">
+                    <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl shadow-lg flex items-center justify-center">
+                        <img 
+                            src={freyssinetLogo}
+                            alt="Freyssinet Logo"
+                            style={{ width: '60px', height: '60px', objectFit: 'contain' }}
+                        />
+                    </div>
+                    <h1 className="text-4xl font-bold text-blue-800 tracking-tight">
+                        IPS TestLAB
+                    </h1>
                 </div>
-
-                <div className="relative mx-auto w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mb-4 shadow-2xl rotate-3 transform hover:rotate-6 transition-transform">
-                    {isLogin ? <Lock className="text-white" size={32} /> : <UserPlus className="text-white" size={32} />}
-                </div>
-                <h2 className="text-3xl font-bold text-white mb-1 tracking-tight">
-                    {isLogin ? 'Connexion' : 'Créer un compte'}
-                </h2>
-                <p className="text-slate-400 text-sm font-medium">IPS TestLAB Inventory System</p>
+                <p className="text-xs font-semibold capitalize tracking-widest" style={{color: 'rgb(126, 132, 139)', fontSize: '13px', letterSpacing: '2px'}}>SYSTÈME DE GESTION D'INVENTAIRE</p>
             </div>
 
-            {/* Form */}
-            <div className="p-8">
-                {error && (
-                    <div className="bg-red-500/10 text-red-400 p-4 rounded-xl mb-6 flex items-center gap-3 border border-red-500/20 text-sm animate-in">
-                        <AlertCircle size={18} className="flex-shrink-0" />
-                        <span>{error}</span>
-                    </div>
-                )}
+            {/* Login Card */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                {/* Card Header */}
+                <div className="p-8 text-center border-b border-gray-100">
+                    <div className="h-0.5 w-12 bg-gradient-to-r from-blue-600 to-blue-100 mx-auto mb-4"></div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1 tracking-tight" style={{marginTop: '100px'}}>
+                        {isLogin ? 'Connexion' : 'Créer un compte'}
+                    </h2>
+                    <p className="text-sm font-medium" style={{color: 'rgb(128, 129, 135)', marginBottom: '30px'}}>
+                        {isLogin ? 'Accédez à votre compte' : 'Inscrivez-vous pour commencer'}
+                    </p>
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    {!isLogin && (
-                        <div className="space-y-2 group">
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nom Complet</label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <User className="text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
-                                </div>
-                                <input
-                                    type="text"
-                                    className="glass-input form-input pl-11 w-full py-3.5"
-                                    placeholder="John Doe"
-                                    value={fullName}
-                                    onChange={(e) => setFullName(e.target.value)}
-                                    required={!isLogin}
-                                />
-                            </div>
+                {/* Card Body */}
+                <div className="p-8">
+                    {error && (
+                        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6 flex items-center gap-3 border border-red-200 text-sm animate-in">
+                            <AlertCircle size={18} className="flex-shrink-0" />
+                            <span>{error}</span>
                         </div>
                     )}
 
-                    <div className="space-y-2 group">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Email Proféssionnel</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Mail className="text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        {!isLogin && (
+                            <div>
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block mb-2">Nom Complet</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <User className="text-gray-400" size={18} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        className="form-input pl-11 w-full"
+                                        placeholder="John Doe"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        required={!isLogin}
+                                    />
+                                </div>
                             </div>
-                            <input
-                                type="email"
-                                className="glass-input form-input pl-11 w-full py-3.5"
-                                placeholder="name@company.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
-                    </div>
+                        )}
 
-                    <div className="space-y-2 group">
-                        <div className="flex justify-between items-center ml-1">
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Mot de passe</label>
-                            {isLogin && <a href="#" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Oublié ?</a>}
+                        <div>
+                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block mb-2" style={{marginLeft: '20px'}}>Email</label>
+                            <div className="relative">
+                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" style={{marginLeft: '20px', width: '408px'}}>
+                                     <Mail className="text-gray-400" size={18} />
+                                 </div>
+                                 <input
+                                     type="email"
+                                     className="form-input pl-11 w-full"
+                                     placeholder="name@company.com"
+                                     value={email}
+                                     onChange={(e) => setEmail(e.target.value)}
+                                     required
+                                     style={{marginLeft: '20px', marginRight: '20px', width: '408px', paddingRight: '16px', overflow: 'visible'}}
+                                 />
+                             </div>
                         </div>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Lock className="text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
+
+                        <div>
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-wide" style={{marginLeft: '20px'}}>Mot de Passe</label>
+                                {isLogin && <a href="#" className="text-xs text-blue-600 hover:text-blue-700 transition-colors" style={{marginRight: '20px'}}>Oublié ?</a>}
                             </div>
-                            <input
-                                type="password"
-                                className="glass-input form-input pl-11 w-full py-3.5"
-                                placeholder="••••••••"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
+                            <div className="relative">
+                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" style={{marginLeft: '20px', width: '408px'}}>
+                                     <Lock className="text-gray-400" size={18} />
+                                 </div>
+                                 <input
+                                     type="password"
+                                     className="form-input pl-11 w-full"
+                                     placeholder="••••••••"
+                                     value={password}
+                                     onChange={(e) => setPassword(e.target.value)}
+                                     required
+                                     style={{width: '408px', marginLeft: '20px', marginRight: '20px'}}
+                                 />
+                             </div>
                         </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="login-submit-btn"
+                            style={{...loginButtonStyle, marginLeft: '20px', marginRight: '20px', width: '408px'}}
+                        >
+                            {loading ? (
+                                <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}>
+                                    <div style={{width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite'}}></div>
+                                    {isLogin ? 'Connexion en cours...' : 'Inscription en cours...'}
+                                </span>
+                            ) : (
+                                <span>
+                                    {isLogin ? 'Se Connecter' : 'S\'inscrire maintenant'}
+                                </span>
+                            )}
+                        </button>
+                    </form>
+
+                    <div className="mt-6 text-center">
+                        <button
+                            onClick={toggleMode}
+                            className="text-gray-600 text-sm hover:text-gray-900 transition-colors"
+                        >
+                            {isLogin ? (
+                                <>Pas de compte ? <span className="text-blue-600 font-bold uppercase tracking-tight">S'inscrire</span></>
+                            ) : (
+                                <>Déjà un compte ? <span className="text-blue-600 font-bold uppercase tracking-tight">Se Connecter</span></>
+                            )}
+                        </button>
                     </div>
-
-                    <Button
-                        type="submit"
-                        disabled={loading}
-                        isLoading={loading}
-                        className="w-full justify-center py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/25 border-none transform active:scale-[0.98] transition-all"
-                    >
-                        {isLogin ? (
-                            <span className="flex items-center gap-2">
-                                Se Connecter <ChevronRight size={18} />
-                            </span>
-                        ) : (
-                            'S\'inscrire maintenant'
-                        )}
-                    </Button>
-                </form>
-
-                <div className="mt-8 text-center">
-                    <button
-                        onClick={toggleMode}
-                        className="text-slate-400 text-sm hover:text-white transition-colors flex items-center justify-center gap-2 mx-auto"
-                    >
-                        {isLogin ? (
-                            <>Pas de compte ? <span className="text-indigo-400 font-bold uppercase tracking-tight">S'inscrire</span></>
-                        ) : (
-                            <>Déjà un compte ? <span className="text-indigo-400 font-bold uppercase tracking-tight">Se Connecter</span></>
-                        )}
-                    </button>
                 </div>
             </div>
         </div>
