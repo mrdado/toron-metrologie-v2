@@ -13,6 +13,15 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+// Diagnostic log for Production debugging (Safe)
+if (import.meta.env.PROD) {
+  console.log("Firebase Init - API Key present:", !!firebaseConfig.apiKey);
+  console.log("Firebase Init - Project ID:", firebaseConfig.projectId);
+  if (firebaseConfig.apiKey && firebaseConfig.apiKey.includes('"')) {
+    console.error("CRITICAL: API Key contains literal quotes!");
+  }
+}
+
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
