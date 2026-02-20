@@ -18,6 +18,7 @@ export default async function handler(request, response) {
     // Basic protection (optional: add a CRON_SECRET check)
 
     try {
+        console.log('dateExpiration');
         console.log("Starting weekly expiration check...");
         console.log("Config Check: Service ID present:", !!process.env.VITE_EMAILJS_SERVICE_ID);
         console.log("Config Check: Public Key present:", !!process.env.VITE_EMAILJS_PUBLIC_KEY);
