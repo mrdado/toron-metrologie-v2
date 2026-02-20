@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { QrCode, Plus, ChevronRight, AlertCircle } from 'lucide-react';
+import { QrCode, Plus, ChevronRight, AlertCircle, Shield } from 'lucide-react';
 import { trackPageView, trackNavigation } from '../utils/analytics';
 import { useInventory } from '../context/InventoryContext';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
+    const { isAdmin } = useAuth();
     const { torons, equipements } = useInventory();
     const [expiredCount, setExpiredCount] = useState(0);
 
@@ -113,6 +115,28 @@ const Home = () => {
                         <ChevronRight size={20} className="management-arrow" />
                     </Link>
                 </div>
+
+                {/* Admin Quick Access */}
+                {isAdmin && (
+                    <div className="mt-8 pt-6 border-t border-slate-200">
+                        <Link
+                            to="/admin"
+                            className="flex items-center justify-between p-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-2xl transition-all border border-indigo-100 group"
+                            onClick={() => trackNavigation('/admin', 'Admin Dashboard Shortcut')}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-indigo-600 text-white rounded-lg shadow-sm group-hover:scale-110 transition-transform">
+                                    <Shield size={20} />
+                                </div>
+                                <div className="text-left">
+                                    <div className="font-bold text-sm">Dashboard Admin</div>
+                                    <div className="text-[10px] opacity-70 uppercase tracking-wider font-semibold">Gérer les accès et alertes</div>
+                                </div>
+                            </div>
+                            <ChevronRight size={18} className="opacity-50" />
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );
