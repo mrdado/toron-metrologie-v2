@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, orderBy } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
-import { UserCheck, UserX, Clock, Shield, ArrowLeft, Search, User } from 'lucide-react';
+import { UserCheck, UserX, Clock, Shield, ArrowLeft, Search, User, Bell, BellOff, Users } from 'lucide-react';
 import Button from '../components/ui/Button';
 import '../styles/MeshBackground.css';
 
 const AdminDashboard = () => {
     const { currentUser, isAdmin } = useAuth();
-    const [pendingUsers, setPendingUsers] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'all'
 
     useEffect(() => {
         if (!isAdmin) return;
 
-        const q = query(collection(db, 'users'), where('isApproved', '==', false));
+        // Fetch ALL users to manage permissions and alerts
+        const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setPendingUsers(users);
+            const fetchedUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setUsers(fetchedUsers);
             setLoading(false);
         });
 
@@ -38,11 +40,19 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleToggleAlerts = async (userId, currentState) => {
+        try {
+            await updateDoc(doc(db, 'users', userId), {
+                expirationAlertsEnabled: !currentState
+            });
+        } catch (error) {
+            console.error("Error updating alert preference:", error);
+        }
+    };
+
     const handleDeny = async (userId) => {
         if (window.confirm("Êtes-vous sûr de vouloir refuser cet accès ?")) {
             try {
-                // For now, we just delete the Firestore doc. 
-                // The user will remain in Auth but won't have a profile to get past PrivateRoute.
                 await deleteDoc(doc(db, 'users', userId));
             } catch (error) {
                 console.error("Error denying user:", error);
@@ -54,7 +64,10 @@ const AdminDashboard = () => {
         return <Navigate to="/" replace />;
     }
 
-    const filteredUsers = pendingUsers.filter(user =>
+    const pendingUsers = users.filter(u => u.isApproved === false);
+    const allUsers = users.filter(u => u.isApproved === true);
+
+    const filteredUsers = (activeTab === 'pending' ? pendingUsers : allUsers).filter(user =>
         user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -74,7 +87,7 @@ const AdminDashboard = () => {
                             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                                 <Shield className="text-indigo-400" /> Administration
                             </h1>
-                            <p className="text-slate-400">Gestion des accès utilisateurs</p>
+                            <p className="text-slate-400">Gestion des utilisateurs et alertes</p>
                         </div>
                     </div>
 
@@ -91,7 +104,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Content */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Stats Card */}
                     <div className="lg:col-span-1 space-y-6">
                         <div className="glass-card p-6 flex items-center gap-4">
@@ -100,28 +113,37 @@ const AdminDashboard = () => {
                             </div>
                             <div>
                                 <p className="text-3xl font-bold text-white">{pendingUsers.length}</p>
-                                <p className="text-slate-400 text-sm">Demandes en attente</p>
+                                <p className="text-slate-400 text-sm">En attente</p>
                             </div>
                         </div>
 
-                        <div className="glass-card p-6">
-                            <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                                <Shield size={18} className="text-indigo-400" /> Infos Admin
-                            </h3>
-                            <div className="space-y-3 text-sm text-slate-300">
-                                <p>Connecté en tant que:</p>
-                                <p className="text-indigo-400 font-mono bg-indigo-500/10 p-2 rounded-lg border border-indigo-500/20">
-                                    {currentUser.email}
-                                </p>
+                        <div className="glass-card p-6 flex items-center gap-4">
+                            <div className="w-12 h-12 bg-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400">
+                                <User size={24} />
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-white">{allUsers.length}</p>
+                                <p className="text-slate-400 text-sm">Utilisateurs actifs</p>
                             </div>
                         </div>
                     </div>
 
                     {/* List Card */}
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-3">
                         <div className="glass-card overflow-hidden">
-                            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
-                                <h2 className="text-xl font-bold text-white">Demandes d'inscription</h2>
+                            <div className="border-b border-white/10 flex bg-white/5">
+                                <button
+                                    onClick={() => setActiveTab('pending')}
+                                    className={`px-6 py-4 font-bold text-sm transition-all ${activeTab === 'pending' ? 'text-white border-b-2 border-indigo-500 bg-white/5' : 'text-slate-400 hover:text-white'}`}
+                                >
+                                    DEMANDES ({pendingUsers.length})
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('all')}
+                                    className={`px-6 py-4 font-bold text-sm transition-all ${activeTab === 'all' ? 'text-white border-b-2 border-indigo-500 bg-white/5' : 'text-slate-400 hover:text-white'}`}
+                                >
+                                    TOUS LES UTILISATEURS
+                                </button>
                             </div>
 
                             <div className="p-0">
@@ -129,41 +151,69 @@ const AdminDashboard = () => {
                                     <div className="p-12 text-center text-slate-400">Chargement...</div>
                                 ) : filteredUsers.length === 0 ? (
                                     <div className="p-12 text-center text-slate-400 italic">
-                                        Aucune demande en attente.
+                                        {activeTab === 'pending' ? 'Aucune demande en attente.' : 'Aucun utilisateur trouvé.'}
                                     </div>
                                 ) : (
                                     <div className="divide-y divide-white/10">
                                         {filteredUsers.map(user => (
                                             <div key={user.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/5 transition-colors">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center text-indigo-400">
+                                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${user.isApproved ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
                                                         <User size={24} />
                                                     </div>
                                                     <div>
                                                         <h4 className="text-white font-bold">{user.fullName || 'Sans nom'}</h4>
                                                         <p className="text-slate-400 text-sm">{user.email}</p>
-                                                        <p className="text-[10px] text-slate-500 font-mono mt-1">ID: {user.id}</p>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            {user.isAdmin && <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 text-[10px] uppercase font-bold tracking-wider border border-indigo-500/20">Admin</span>}
+                                                            <span className="text-[10px] text-slate-500 font-mono">ID: {user.id}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => handleDeny(user.id)}
-                                                        className="p-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-all flex items-center gap-2 text-sm font-bold"
-                                                    >
-                                                        <UserX size={18} /> Refuser
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleApprove(user.id)}
-                                                        className="p-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl transition-all flex items-center gap-2 text-sm font-bold"
-                                                    >
-                                                        <UserCheck size={18} /> Approuver
-                                                    </button>
+                                                <div className="flex gap-2 items-center">
+                                                    {user.isApproved ? (
+                                                        <>
+                                                            {/* Alert Toggle */}
+                                                            <button
+                                                                onClick={() => handleToggleAlerts(user.id, user.expirationAlertsEnabled)}
+                                                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border ${user.expirationAlertsEnabled
+                                                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                                                    : 'bg-slate-500/10 text-slate-400 border-white/10'
+                                                                    }`}
+                                                            >
+                                                                <Bell size={16} className={user.expirationAlertsEnabled ? 'animate-pulse' : ''} />
+                                                                {user.expirationAlertsEnabled ? 'Alertes ON' : 'Alertes OFF'}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeny(user.id)}
+                                                                className="p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-all"
+                                                                title="Supprimer l'utilisateur"
+                                                            >
+                                                                <UserX size={18} />
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleDeny(user.id)}
+                                                                className="p-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-all flex items-center gap-2 text-sm font-bold"
+                                                            >
+                                                                <UserX size={18} /> Refuser
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleApprove(user.id)}
+                                                                className="p-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl transition-all flex items-center gap-2 text-sm font-bold"
+                                                            >
+                                                                <UserCheck size={18} /> Approuver
+                                                            </button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                )}
+                                )}\n
                             </div>
                         </div>
                     </div>
