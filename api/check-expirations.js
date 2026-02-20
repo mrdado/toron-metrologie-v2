@@ -19,6 +19,9 @@ export default async function handler(request, response) {
 
     try {
         console.log("Starting weekly expiration check...");
+        console.log("Config Check: Service ID present:", !!process.env.VITE_EMAILJS_SERVICE_ID);
+        console.log("Config Check: Public Key present:", !!process.env.VITE_EMAILJS_PUBLIC_KEY);
+        console.log("Config Check: Private Key present:", !!process.env.EMAILJS_PRIVATE_KEY);
 
         const today = new Date();
         const futureDate = new Date();
