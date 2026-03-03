@@ -79,38 +79,74 @@ const ListEquipment = () => {
         const file = e.target.files[0];
         if (!file) return;
 
-        if (!window.confirm("Attention: L'importation modifiera la base de données. Continuer ?")) {
-            e.target.value = null;
-            return;
-        }
-
         try {
             const data = await importFromExcel(file);
+
+            // Build a Set of UUIDs from the Excel file (only rows that have a UUID)
+            const excelUUIDs = new Set(data.filter(row => row.UUID).map(row => String(row.UUID)));
+
+            // Find items in DB that are NOT in the Excel file => to be deleted
+            const toDelete = equipements.filter(eq => !excelUUIDs.has(eq.id));
+
+            // Show a detailed confirmation dialog
+            if (toDelete.length > 0) {
+                const confirmed = window.confirm(
+                    `Attention: Cette synchronisation va:\n` +
+                    `- Mettre à jour / Ajouter les équipements du fichier Excel\n` +
+                    `- Supprimer ${toDelete.length} équipement(s) absent(s) du fichier Excel:\n` +
+                    toDelete.map(eq => `  • ${eq.nom || eq.id}`).join('\n') +
+                    `\n\nContinuer ?`
+                );
+                if (!confirmed) {
+                    e.target.value = null;
+                    return;
+                }
+            } else {
+                if (!window.confirm("Attention: L'importation va modifier la base de données. Continuer ?")) {
+                    e.target.value = null;
+                    return;
+                }
+            }
+
             let created = 0;
             let updated = 0;
+            let deleted = 0;
 
+            // Step 1: Update existing items or add new ones
             for (const row of data) {
                 const itemData = {
                     nom: row.Nom || '',
-                    numeroSerie: row.NumeroSerie || '',
+                    numeroSerie: row.NumeroSerie ? String(row.NumeroSerie) : '',
                     type: row.Type || '',
-                    dateCalibration: row.DateCalibration || '',
-                    dateExpiration: row.DateExpiration || '',
+                    dateCalibration: row.DateCalibration ? String(row.DateCalibration) : '',
+                    dateExpiration: row.DateExpiration ? String(row.DateExpiration) : '',
                     etalonnage: row.Etalonnage || ''
                 };
 
-                if (row.UUID && equipements.some(e => e.id === row.UUID)) {
-                    await updateEquipment(row.UUID, itemData);
+                if (row.UUID && equipements.some(eq => eq.id === String(row.UUID))) {
+                    await updateEquipment(String(row.UUID), itemData);
                     updated++;
                 } else {
                     await addEquipment(itemData);
                     created++;
                 }
             }
-            alert(`Importation réussie !\nCréés: ${created}\nMis à jour: ${updated}`);
+
+            // Step 2: Delete items that are in the DB but not in the Excel file
+            for (const item of toDelete) {
+                await deleteItem('equipment', item.id);
+                deleted++;
+            }
+
+            alert(
+                `Synchronisation réussie !\n` +
+                `✔ Créés: ${created}\n` +
+                `✔ Mis à jour: ${updated}\n` +
+                `🗑 Supprimés: ${deleted}`
+            );
         } catch (err) {
             console.error(err);
-            alert("Erreur lors de l'importation : " + err.message);
+            alert("Erreur lors de la synchronisation : " + err.message);
         } finally {
             e.target.value = null;
         }
@@ -126,7 +162,7 @@ const ListEquipment = () => {
                 </button>
                 <button onClick={handleImportClick} className="btn btn-outline btn-sm">
                     <Upload size={18} />
-                    Importer
+                    Synchroniser Excel
                 </button>
                 <input
                     type="file"
@@ -193,13 +229,13 @@ const ListEquipment = () => {
                     />
                 )}
 
-                {filteredEquipments.map((equip, index) => {
+                {filteredEquipments.map((equip) => {
                     const status = getStatus(equip.dateExpiration);
                     return (
                         <div key={equip.id} className="card card-hover stagger-item">
                             <div className="flex items-start justify-between gap-4">
-                                <div 
-                                    className="flex-1 cursor-pointer" 
+                                <div
+                                    className="flex-1 cursor-pointer"
                                     onClick={() => navigate(`/equipements/view/${equip.id}`)}
                                 >
                                     <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -227,8 +263,8 @@ const ListEquipment = () => {
                                 </div>
 
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
+                                    onClick={(ev) => {
+                                        ev.stopPropagation();
                                         navigate(`/equipements/edit/${equip.id}`);
                                     }}
                                     className="icon-btn flex-shrink-0"
