@@ -6,6 +6,8 @@ import { ArrowLeft, Edit, Download, Share2, Upload } from 'lucide-react';
 import QRCode from 'qrcode';
 import TabNav from '../../components/ui/TabNav';
 
+import { toDisplayDate } from '../../utils/dateUtils';
+
 const ViewEquipment = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -89,8 +91,8 @@ const ViewEquipment = () => {
         <div className="min-h-screen bg-gray-50 pb-12">
             {/* Action Bar */}
             <div className="flex items-center justify-end gap-2 mb-6">
-                <button 
-                    onClick={() => navigate('/equipements/edit')} 
+                <button
+                    onClick={() => navigate('/equipements/edit')}
                     className="btn btn-equipment btn-sm"
                 >
                     <ArrowLeft size={18} />
@@ -131,11 +133,11 @@ const ViewEquipment = () => {
 
                             <div className="space-y-1">
                                 <p className="text-xs font-semibold text-gray-400 uppercase">Date d'étalonnage</p>
-                                <p className="text-sm font-medium text-gray-900">{equipment?.dateCalibration || 'N/A'}</p>
+                                <p className="text-sm font-medium text-gray-900">{toDisplayDate(equipment?.dateCalibration) || 'N/A'}</p>
                             </div>
                             <div className="space-y-1">
                                 <p className="text-xs font-semibold text-gray-400 uppercase">Date d'expiration</p>
-                                <p className="text-sm font-medium text-red-600">{equipment?.dateExpiration || 'N/A'}</p>
+                                <p className="text-sm font-medium text-red-600">{toDisplayDate(equipment?.dateExpiration) || 'N/A'}</p>
                             </div>
 
                             {equipment?.etalonnage && (
@@ -209,11 +211,11 @@ const ViewEquipment = () => {
                             />
                         </div>
 
-                        <div className="flex gap-4 justify-center w-full" style={{height: '44px'}}>
+                        <div className="flex gap-4 justify-center w-full" style={{ height: '44px' }}>
                             <button
                                 onClick={handleDownload}
                                 className="btn btn-outline btn-sm flex-1"
-                                style={{height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
+                                style={{ height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
                                 <Download size={18} />
                                 Enregistrer
@@ -221,7 +223,7 @@ const ViewEquipment = () => {
                             <button
                                 onClick={handleShare}
                                 className="btn btn-dark btn-sm flex-1"
-                                style={{height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
+                                style={{ height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
                                 <Share2 size={18} />
                                 Partager

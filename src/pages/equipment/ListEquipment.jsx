@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
 import { FileSpreadsheet, Upload, Edit, AlertCircle, CheckCircle, Search } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
+import { toDisplayDate, parseAnyDate } from '../../utils/dateUtils';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 import EmptyState from '../../components/ui/EmptyState';
 
@@ -64,8 +65,8 @@ const ListEquipment = () => {
             Nom: e.nom,
             NumeroSerie: e.numeroSerie,
             Type: e.type,
-            DateCalibration: e.dateCalibration,
-            DateExpiration: e.dateExpiration,
+            DateCalibration: toDisplayDate(e.dateCalibration),
+            DateExpiration: toDisplayDate(e.dateExpiration),
             Etalonnage: e.etalonnage
         }));
         exportToExcel(dataToExport, `Inventaire_Equipements_${new Date().toISOString().split('T')[0]}`);
@@ -118,8 +119,8 @@ const ListEquipment = () => {
                     nom: row.Nom || '',
                     numeroSerie: row.NumeroSerie ? String(row.NumeroSerie) : '',
                     type: row.Type || '',
-                    dateCalibration: row.DateCalibration ? String(row.DateCalibration) : '',
-                    dateExpiration: row.DateExpiration ? String(row.DateExpiration) : '',
+                    dateCalibration: parseAnyDate(row.DateCalibration),
+                    dateExpiration: parseAnyDate(row.DateExpiration),
                     etalonnage: row.Etalonnage || ''
                 };
 
@@ -252,7 +253,7 @@ const ListEquipment = () => {
                                     </div>
 
                                     <p className="text-sm text-gray-500">
-                                        Expiration: {equip.dateExpiration}
+                                        Expiration: {toDisplayDate(equip.dateExpiration)}
                                     </p>
                                     {equip.certificates && equip.certificates.length > 0 && (
                                         <div className="mt-2 text-teal-600 font-medium text-xs flex items-center gap-1">
