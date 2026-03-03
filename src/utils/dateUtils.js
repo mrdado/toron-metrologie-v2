@@ -23,7 +23,15 @@ export const parseAnyDate = (date) => {
 
     // Handle native Date object (often from XLSX)
     if (date instanceof Date) {
+        // Use UTC to avoid timezone shifts from Excel
         return date.toISOString().split('T')[0];
+    }
+
+    // Handle Excel Serial Number (numeric)
+    if (typeof date === 'number') {
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+        const jsDate = new Date(excelEpoch.getTime() + date * 86400000);
+        return jsDate.toISOString().split('T')[0];
     }
 
     if (typeof date !== 'string') return String(date);
