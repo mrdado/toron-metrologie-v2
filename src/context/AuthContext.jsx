@@ -4,7 +4,8 @@ import {
     onAuthStateChanged,
     signInWithEmailAndPassword,
     signOut,
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail
 } from 'firebase/auth';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
@@ -37,6 +38,10 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         return signOut(auth);
+    };
+
+    const resetPassword = (email) => {
+        return sendPasswordResetEmail(auth, email);
     };
 
     useEffect(() => {
@@ -87,6 +92,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        resetPassword,
         isApproved: (currentUser?.profile?.isApproved === true),
         isAdmin: (currentUser?.profile?.isAdmin === true)
     };

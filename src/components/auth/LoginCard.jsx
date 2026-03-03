@@ -3,7 +3,7 @@ import { LogIn, UserPlus, Mail, Lock, User, Clock, CheckCircle, AlertCircle } fr
 import Button from '../ui/Button';
 import freyssinetLogo from '../../assets/Freyssinet logo.png';
 
-const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingApproval }) => {
+const LoginCard = ({ onLogin, onRegister, onLogout, onForgotPassword, error, success, loading, pendingApproval }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -78,7 +78,7 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
             <div className="mb-8 text-center">
                 <div className="flex items-center justify-center gap-4 mb-3">
                     <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl shadow-lg flex items-center justify-center">
-                        <img 
+                        <img
                             src={freyssinetLogo}
                             alt="Freyssinet Logo"
                             style={{ width: '60px', height: '60px', objectFit: 'contain' }}
@@ -88,7 +88,7 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
                         IPS TestLAB
                     </h1>
                 </div>
-                <p className="text-xs font-semibold capitalize tracking-widest" style={{color: 'rgb(126, 132, 139)', fontSize: '13px', letterSpacing: '2px'}}>SYSTÈME DE GESTION D'INVENTAIRE</p>
+                <p className="text-xs font-semibold capitalize tracking-widest" style={{ color: 'rgb(126, 132, 139)', fontSize: '13px', letterSpacing: '2px' }}>SYSTÈME DE GESTION D'INVENTAIRE</p>
             </div>
 
             {/* Login Card */}
@@ -96,10 +96,10 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
                 {/* Card Header */}
                 <div className="p-8 text-center border-b border-gray-100">
                     <div className="h-0.5 w-12 bg-gradient-to-r from-blue-600 to-blue-100 mx-auto mb-4"></div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-1 tracking-tight" style={{marginTop: '24px'}}>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1 tracking-tight" style={{ marginTop: '24px' }}>
                         {isLogin ? 'Connexion' : 'Créer un compte'}
                     </h2>
-                    <p className="text-sm font-medium" style={{color: 'rgb(128, 129, 135)', marginBottom: '30px'}}>
+                    <p className="text-sm font-medium" style={{ color: 'rgb(128, 129, 135)', marginBottom: '30px' }}>
                         {isLogin ? 'Accédez à votre compte' : 'Inscrivez-vous pour commencer'}
                     </p>
                 </div>
@@ -110,6 +110,13 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
                         <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6 flex items-center gap-3 border border-red-200 text-sm animate-in">
                             <AlertCircle size={18} className="flex-shrink-0" />
                             <span>{error}</span>
+                        </div>
+                    )}
+
+                    {success && (
+                        <div className="bg-emerald-50 text-emerald-700 p-4 rounded-lg mb-6 flex items-center gap-3 border border-emerald-200 text-sm animate-in">
+                            <CheckCircle size={18} className="flex-shrink-0" />
+                            <span>{success}</span>
                         </div>
                     )}
 
@@ -136,39 +143,47 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
                         <div>
                             <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block mb-2">Email</label>
                             <div className="relative">
-                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                     <Mail className="text-gray-400" size={18} />
-                                 </div>
-                                 <input
-                                     type="email"
-                                     className="form-input pl-11 w-full"
-                                     placeholder="name@company.com"
-                                     value={email}
-                                     onChange={(e) => setEmail(e.target.value)}
-                                     required
-                                 />
-                             </div>
-                         </div>
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Mail className="text-gray-400" size={18} />
+                                </div>
+                                <input
+                                    type="email"
+                                    className="form-input pl-11 w-full"
+                                    placeholder="name@company.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
 
                         <div>
                             <div className="flex justify-between items-center mb-2">
                                 <label className="text-xs font-bold text-gray-700 uppercase tracking-wide">Mot de Passe</label>
-                                {isLogin && <a href="#" className="text-xs text-blue-600 hover:text-blue-700 transition-colors">Oublié ?</a>}
+                                {isLogin && (
+                                    <button
+                                        type="button"
+                                        onClick={() => onForgotPassword(email)}
+                                        className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-semibold"
+                                    >
+                                        Oublié ?
+                                    </button>
+                                )}
                             </div>
                             <div className="relative">
-                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                     <Lock className="text-gray-400" size={18} />
-                                 </div>
-                                 <input
-                                     type="password"
-                                     className="form-input pl-11 w-full"
-                                     placeholder="••••••••"
-                                     value={password}
-                                     onChange={(e) => setPassword(e.target.value)}
-                                     required
-                                 />
-                             </div>
-                         </div>
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Lock className="text-gray-400" size={18} />
+                                </div>
+                                <input
+                                    type="password"
+                                    className="form-input pl-11 w-full"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
 
                         <button
                             type="submit"
@@ -177,8 +192,8 @@ const LoginCard = ({ onLogin, onRegister, onLogout, error, loading, pendingAppro
                             style={loginButtonStyle}
                         >
                             {loading ? (
-                                <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}>
-                                    <div style={{width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite'}}></div>
+                                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                    <div style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }}></div>
                                     {isLogin ? 'Connexion en cours...' : 'Inscription en cours...'}
                                 </span>
                             ) : (

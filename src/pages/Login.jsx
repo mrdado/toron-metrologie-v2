@@ -7,9 +7,10 @@ import emailjs from '@emailjs/browser';
 
 const Login = () => {
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
     const [pendingApproval, setPendingApproval] = useState(false);
-    const { login, register, logout, currentUser, isApproved } = useAuth();
+    const { login, register, logout, currentUser, isApproved, resetPassword } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -25,6 +26,7 @@ const Login = () => {
     const handleLogin = async (email, password) => {
         try {
             setError('');
+            setSuccess('');
             setLoading(true);
             await login(email, password);
             navigate('/');
@@ -39,6 +41,7 @@ const Login = () => {
     const handleRegister = async (email, password, fullName) => {
         try {
             setError('');
+            setSuccess('');
             setLoading(true);
             await register(email, password, fullName);
 
@@ -88,13 +91,38 @@ const Login = () => {
         }
     };
 
+    const handleForgotPassword = async (email) => {
+        if (!email) {
+            setError('Veuillez entrer votre adresse email.');
+            return;
+        }
+        try {
+            setError('');
+            setSuccess('');
+            setLoading(true);
+            await resetPassword(email);
+            setSuccess('Un email de réinitialisation a été envoyé à ' + email);
+        } catch (err) {
+            console.error(err);
+            if (err.code === 'auth/user-not-found') {
+                setError('Aucun utilisateur trouvé avec cet email.');
+            } else {
+                setError('Impossible d\'envoyer l\'email de réinitialisation.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100">
             <LoginCard
                 onLogin={handleLogin}
                 onRegister={handleRegister}
                 onLogout={handleLogout}
+                onForgotPassword={handleForgotPassword}
                 error={error}
+                success={success}
                 loading={loading}
                 pendingApproval={pendingApproval}
             />
