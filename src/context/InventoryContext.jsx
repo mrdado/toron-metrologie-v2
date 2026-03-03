@@ -11,14 +11,15 @@ import {
     getDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useAuth } from './AuthContext';
+import { uploadCertificate, deleteFiles } from '../utils/blob';
 
 const InventoryContext = createContext();
 
 export const useInventory = () => useContext(InventoryContext);
 
-import { uploadCertificate, deleteFiles } from '../utils/blob';
-
 export const InventoryProvider = ({ children }) => {
+    const { currentUser } = useAuth();
     const [torons, setTorons] = useState([]);
     const [equipements, setEquipements] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,6 +27,11 @@ export const InventoryProvider = ({ children }) => {
 
     // Subscribe to Torons
     useEffect(() => {
+        if (!currentUser) {
+            setTorons([]);
+            return;
+        }
+
         const q = query(collection(db, 'torons'), orderBy('createdAt', 'desc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const data = snapshot.docs.map(doc => ({
@@ -37,10 +43,17 @@ export const InventoryProvider = ({ children }) => {
             console.error("Error fetching torons:", err);
         });
         return () => unsubscribe();
-    }, []);
+    }, [currentUser]);
 
     // Subscribe to Equipment
     useEffect(() => {
+        if (!currentUser) {
+            setEquipements([]);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
         const q = query(collection(db, 'equipements'), orderBy('createdAt', 'desc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const data = snapshot.docs.map(doc => ({
@@ -54,7 +67,7 @@ export const InventoryProvider = ({ children }) => {
             setLoading(false);
         });
         return () => unsubscribe();
-    }, []);
+    }, [currentUser]);
 
     const addToron = async (data, files = []) => {
         try {
