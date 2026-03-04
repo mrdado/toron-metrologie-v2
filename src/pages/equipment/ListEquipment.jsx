@@ -34,8 +34,7 @@ const ListEquipment = () => {
 
         // Apply search term
         return results.filter(e =>
-            e.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            e.numeroSerie?.toLowerCase().includes(searchTerm.toLowerCase())
+            e.nom?.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [equipements, searchTerm, filterType]);
 
@@ -63,7 +62,6 @@ const ListEquipment = () => {
         const dataToExport = filteredEquipments.map(e => ({
             UUID: e.id,
             Nom: e.nom,
-            NumeroSerie: e.numeroSerie,
             Type: e.type,
             DateCalibration: toDisplayDate(e.dateCalibration),
             DateExpiration: toDisplayDate(e.dateExpiration),
@@ -117,7 +115,6 @@ const ListEquipment = () => {
             for (const row of data) {
                 const itemData = {
                     nom: row.Nom || '',
-                    numeroSerie: row.NumeroSerie ? String(row.NumeroSerie) : '',
                     type: row.Type || '',
                     dateCalibration: parseAnyDate(row.DateCalibration),
                     dateExpiration: parseAnyDate(row.DateExpiration),
@@ -186,7 +183,7 @@ const ListEquipment = () => {
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         <input
                             type="text"
-                            placeholder="Rechercher par nom ou numéro de série..."
+                            placeholder="Rechercher par nom..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             disabled={loading}

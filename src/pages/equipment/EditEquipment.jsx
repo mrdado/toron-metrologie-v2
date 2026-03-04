@@ -16,7 +16,6 @@ const EditEquipment = () => {
 
     const [formData, setFormData] = useState({
         nom: '',
-        numeroSerie: '',
         type: '',
         dateCalibration: '',
         dateExpiration: '',
@@ -192,8 +191,8 @@ const EditEquipment = () => {
                                 <div key={index} className="flex items-center justify-between p-2 border rounded-lg" style={{ backgroundColor: 'var(--equipment-light)', borderColor: 'var(--equipment-primary)' }}>
                                     <div className="flex items-center gap-2 overflow-hidden">
                                         <div className="w-8 h-8 rounded flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(155, 94, 94, 0.1)', color: 'var(--equipment-primary)' }}>
-                                             <Upload size={14} />
-                                         </div>
+                                            <Upload size={14} />
+                                        </div>
                                         <span className="text-xs font-medium truncate">{cert.name}</span>
                                     </div>
                                     <div className="flex gap-1">
@@ -223,7 +222,7 @@ const EditEquipment = () => {
                             accept="image/*,.pdf"
                             onChange={(e) => setFiles([...e.target.files])}
                             ref={fileInputRef}
-                            style={{display: 'none'}}
+                            style={{ display: 'none' }}
                         />
                         <button
                             type="button"
@@ -234,10 +233,10 @@ const EditEquipment = () => {
                             {formData.certificates?.length > 0 ? 'Ajouter d\'autres fichiers' : 'Télécharger des fichiers'}
                         </button>
                         {files.length > 0 && (
-                             <p className="text-sm mt-2 font-medium" style={{ color: 'var(--equipment-primary)' }}>
-                                 + {files.length} novo(s) arquivo(s) selecionado(s)
-                             </p>
-                         )}
+                            <p className="text-sm mt-2 font-medium" style={{ color: 'var(--equipment-primary)' }}>
+                                + {files.length} novo(s) arquivo(s) selecionado(s)
+                            </p>
+                        )}
                     </div>
                 </div>
 

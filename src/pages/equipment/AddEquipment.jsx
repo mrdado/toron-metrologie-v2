@@ -17,7 +17,6 @@ const AddEquipment = () => {
 
     const [formData, setFormData] = useState({
         nom: '',
-        numeroSerie: '',
         type: '',
         dateCalibration: '',
         dateExpiration: '',
@@ -95,7 +94,7 @@ const AddEquipment = () => {
                         <button
                             onClick={() => {
                                 setCreatedId(null);
-                                setFormData({ nom: '', numeroSerie: '', type: '', dateCalibration: '', dateExpiration: '', etalonnage: '' });
+                                setFormData({ nom: '', type: '', dateCalibration: '', dateExpiration: '', etalonnage: '' });
                             }}
                             className="btn btn-outline"
                         >
