@@ -61,7 +61,7 @@ export default async function handler(request, response) {
 
         // 3. Send emails individually for better reliability
         const equipmentList = expiringEquipment.map(e =>
-            `- ${e.nom} (S/N: ${e.type}) - Exp: ${e.dateExpiration}`
+            `- ${e.nom} (Type: ${e.type}) - Exp: ${e.dateExpiration}`
         ).join('\n');
 
         const results = [];
