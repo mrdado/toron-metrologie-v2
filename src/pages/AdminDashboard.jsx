@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../firebase';
-import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, orderBy } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc, orderBy } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
 import { UserX, ArrowLeft, Bell, Settings } from 'lucide-react';
@@ -50,11 +50,20 @@ const AdminDashboard = () => {
     };
 
     const handleDeny = async (userId) => {
-        if (window.confirm("Êtes-vous sûr de vouloir refuser cet accès ?")) {
+        if (window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
             try {
-                await deleteDoc(doc(db, 'users', userId));
+                const res = await fetch('/api/delete-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid: userId })
+                });
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.error || 'Erreur inconnue');
+                }
             } catch (error) {
-                console.error("Error denying user:", error);
+                console.error("Error deleting user:", error);
+                alert("Erreur lors de la suppression : " + error.message);
             }
         }
     };
@@ -88,8 +97,8 @@ const AdminDashboard = () => {
             <div className="max-w-6xl mx-auto">
                 {/* Header Bar - Back Button + Search + Filter */}
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mb-6">
-                    <Link 
-                        to="/" 
+                    <Link
+                        to="/"
                         className="admin-back-btn"
                         aria-label="Retour à l'accueil"
                     >
@@ -103,7 +112,7 @@ const AdminDashboard = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         aria-label="Rechercher les utilisateurs"
                     />
-                    <button 
+                    <button
                         className="admin-filter-btn"
                         aria-label="Filtrer les utilisateurs"
                         title="Options de filtrage"
@@ -167,8 +176,8 @@ const AdminDashboard = () => {
                                 {activeTab === 'pending' ? '✅ Aucune demande en attente' : '❌ Aucun utilisateur trouvé'}
                             </p>
                             <p className="text-sm text-gray-600">
-                                {activeTab === 'pending' 
-                                    ? 'Tous les accès ont été approuvés.' 
+                                {activeTab === 'pending'
+                                    ? 'Tous les accès ont été approuvés.'
                                     : 'Essayez de modifier votre recherche.'}
                             </p>
                         </div>
