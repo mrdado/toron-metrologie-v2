@@ -155,12 +155,13 @@ const ListToron = () => {
                 )}
 
                 {filteredTorons.map((toron, index) => (
-                    <div key={toron.id} className="card card-hover stagger-item">
+                    <div 
+                        key={toron.id} 
+                        className="card card-hover stagger-item cursor-pointer"
+                        onClick={() => navigate(`/torons/view/${toron.id}`)}
+                    >
                         <div className="flex items-start justify-between gap-4">
-                            <div 
-                                className="flex-1 cursor-pointer" 
-                                onClick={() => navigate(`/torons/view/${toron.id}`)}
-                            >
+                            <div className="flex-1">
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">
                                     {toron.fournisseur}
                                 </h3>

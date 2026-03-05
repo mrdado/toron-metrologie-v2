@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, orderBy } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
-import { UserCheck, UserX, ArrowLeft, Bell } from 'lucide-react';
+import { UserX, ArrowLeft, Bell, Settings } from 'lucide-react';
 
 const AdminDashboard = () => {
     const { currentUser, isAdmin } = useAuth();
@@ -11,6 +11,8 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('pending');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         if (!isAdmin) return;
@@ -64,159 +66,213 @@ const AdminDashboard = () => {
     const pendingUsers = users.filter(u => u.isApproved === false);
     const allUsers = users.filter(u => u.isApproved === true);
 
-    const filteredUsers = (activeTab === 'pending' ? pendingUsers : allUsers).filter(user =>
-        user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredUsers = useMemo(() => {
+        return (activeTab === 'pending' ? pendingUsers : allUsers).filter(user =>
+            user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [activeTab, pendingUsers, allUsers, searchTerm]);
+
+    // Pagination
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+
+    // Reset to page 1 when tab or search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeTab, searchTerm]);
 
     return (
-        <div className="min-h-screen w-full p-4 md:p-8" style={{background: 'linear-gradient(135deg, #f5f7fa 0%, #f0f2f5 100%)'}}>
-            <div className="max-w-4xl mx-auto">
-                {/* Header Bar - Back Button + Search */}
-                <div className="flex items-center gap-3 mb-6">
+        <div className="min-h-screen w-full p-4 md:p-6 bg-gray-50">
+            <div className="max-w-6xl mx-auto">
+                {/* Header Bar - Back Button + Search + Filter */}
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mb-6">
                     <Link 
                         to="/" 
-                        className="flex items-center justify-center w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-xl transition-all flex-shrink-0"
+                        className="admin-back-btn"
                         aria-label="Retour à l'accueil"
                     >
-                        <ArrowLeft size={20} className="text-gray-700" />
+                        <ArrowLeft size={20} />
                     </Link>
                     <input
                         type="text"
-                        placeholder="Rechercher..."
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+                        placeholder="Rechercher par nom ou email..."
+                        className="flex-1 admin-search-input"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
+                        aria-label="Rechercher les utilisateurs"
                     />
+                    <button 
+                        className="admin-filter-btn"
+                        aria-label="Filtrer les utilisateurs"
+                        title="Options de filtrage"
+                    >
+                        <Settings size={18} />
+                    </button>
                 </div>
 
-                {/* Stats Cards - Gradient Style */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div 
-                        className="rounded-2xl p-6 text-center border shadow-sm"
-                        style={{
-                            background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-                            borderColor: '#fcd34d'
-                        }}
-                    >
-                        <div className="text-4xl font-bold text-gray-900 mb-1">{pendingUsers.length}</div>
-                        <div className="text-xs text-gray-600 uppercase font-semibold tracking-wider">En Attente</div>
+                {/* KPI Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+                    <div className="admin-stat-card">
+                        <div className="admin-stat-number">{pendingUsers.length}</div>
+                        <div className="admin-stat-label">En Attente</div>
                     </div>
-
-                    <div 
-                        className="rounded-2xl p-6 text-center border shadow-sm"
-                        style={{
-                            background: 'linear-gradient(135deg, #c7d2e8 0%, #a8bde0 100%)',
-                            borderColor: '#4B6BA6'
-                        }}
-                    >
-                        <div className="text-4xl font-bold text-gray-900 mb-1">{allUsers.length}</div>
-                        <div className="text-xs text-gray-600 uppercase font-semibold tracking-wider">Actifs</div>
+                    <div className="admin-stat-card">
+                        <div className="admin-stat-number">{allUsers.length}</div>
+                        <div className="admin-stat-label">Actifs</div>
+                    </div>
+                    <div className="admin-stat-card">
+                        <div className="admin-stat-number">{users.filter(u => u.isAdmin).length}</div>
+                        <div className="admin-stat-label">Admins</div>
+                    </div>
+                    <div className="admin-stat-card">
+                        <div className="admin-stat-number">{users.length}</div>
+                        <div className="admin-stat-label">Total</div>
                     </div>
                 </div>
 
-                {/* Tabs - Outlined/Filled Style */}
-                <div className="flex gap-2 mb-4">
+                {/* Tabs - with proper ARIA attributes */}
+                <div className="admin-tabs-container" role="tablist">
                     <button
                         onClick={() => setActiveTab('pending')}
-                        className={`flex-1 py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ${
-                            activeTab === 'pending'
-                                ? 'text-white'
-                                : 'bg-white text-gray-700 border-2 hover:border-gray-400'
-                        }`}
-                        style={{
-                            background: activeTab === 'pending' ? '#4B6BA6' : 'white',
-                            borderColor: activeTab === 'pending' ? '#4B6BA6' : '#4B6BA6'
-                        }}
+                        className={`admin-tab ${activeTab === 'pending' ? 'admin-tab-active' : ''}`}
+                        role="tab"
+                        aria-selected={activeTab === 'pending'}
+                        aria-controls="pending-panel"
                     >
                         Demandes ({pendingUsers.length})
                     </button>
                     <button
                         onClick={() => setActiveTab('all')}
-                        className={`flex-1 py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ${
-                            activeTab === 'all'
-                                ? 'text-white'
-                                : 'bg-white text-gray-700 border-2 hover:border-gray-400'
-                        }`}
-                        style={{
-                            background: activeTab === 'all' ? '#4B6BA6' : 'white',
-                            borderColor: activeTab === 'all' ? '#4B6BA6' : '#4B6BA6'
-                        }}
+                        className={`admin-tab ${activeTab === 'all' ? 'admin-tab-active' : ''}`}
+                        role="tab"
+                        aria-selected={activeTab === 'all'}
+                        aria-controls="all-panel"
                     >
-                        Utilisateurs
+                        Utilisateurs ({allUsers.length})
                     </button>
                 </div>
 
-                {/* User Cards List */}
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                {/* Table Section */}
+                <div className="admin-table-wrapper">
                     {loading ? (
-                        <div className="p-12 text-center text-gray-500">
-                            <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-600 rounded-full mx-auto mb-4 animate-spin"></div>
-                            Chargement...
+                        <div className="admin-loading-state">
+                            <div className="admin-spinner"></div>
+                            <p>Chargement des utilisateurs...</p>
                         </div>
                     ) : filteredUsers.length === 0 ? (
-                        <div className="p-12 text-center text-gray-500 italic bg-white rounded-xl border border-gray-200">
-                            {activeTab === 'pending' ? 'Aucune demande en attente.' : 'Aucun utilisateur trouvé.'}
+                        <div className="admin-empty-state">
+                            <p className="text-lg font-semibold mb-2">
+                                {activeTab === 'pending' ? '✅ Aucune demande en attente' : '❌ Aucun utilisateur trouvé'}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                                {activeTab === 'pending' 
+                                    ? 'Tous les accès ont été approuvés.' 
+                                    : 'Essayez de modifier votre recherche.'}
+                            </p>
                         </div>
                     ) : (
-                        filteredUsers.map(user => (
-                            <div 
-                                key={user.id} 
-                                className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center justify-between hover:bg-gray-100 transition-colors"
-                            >
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <div className="font-bold text-gray-900 text-sm">{user.fullName || 'Sans nom'}</div>
-                                        {user.isAdmin && (
-                                            <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px] uppercase font-bold">
-                                                Admin
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="text-gray-600 text-xs mt-0.5">{user.email}</div>
-                                </div>
-
-                                <div className="flex gap-2 items-center ml-4">
-                                    {user.isApproved ? (
-                                        <>
-                                            <button
-                                                onClick={() => handleToggleAlerts(user.id, user.expirationAlertsEnabled)}
-                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                                                    user.expirationAlertsEnabled
-                                                        ? 'bg-blue-100 text-blue-700'
-                                                        : 'bg-gray-200 text-gray-600'
-                                                }`}
-                                            >
-                                                <Bell size={12} />
-                                                Alertes {user.expirationAlertsEnabled ? 'ON' : 'OFF'}
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeny(user.id)}
-                                                className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all"
-                                                title="Supprimer"
-                                            >
-                                                <UserX size={16} />
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button
-                                                onClick={() => handleDeny(user.id)}
-                                                className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-all text-xs font-bold"
-                                            >
-                                                Refuser
-                                            </button>
-                                            <button
-                                                onClick={() => handleApprove(user.id)}
-                                                className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-all text-xs font-bold"
-                                            >
-                                                Approuver
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
+                        <>
+                            <div className="admin-table-header">
+                                <div className="admin-table-col-1">Nom</div>
+                                <div className="admin-table-col-2">Email</div>
+                                <div className="admin-table-col-3">Statut</div>
+                                <div className="admin-table-col-4">Actions</div>
                             </div>
-                        ))
+                            <div className="admin-table-body">
+                                {paginatedUsers.map(user => (
+                                    <div key={user.id} className="admin-table-row">
+                                        <div className="admin-table-col-1">
+                                            <span className="font-semibold text-gray-900">{user.fullName || 'Sans nom'}</span>
+                                            {user.isAdmin && (
+                                                <span className="admin-badge-admin">Admin</span>
+                                            )}
+                                        </div>
+                                        <div className="admin-table-col-2">
+                                            <span className="text-sm text-gray-600">{user.email}</span>
+                                        </div>
+                                        <div className="admin-table-col-3">
+                                            <span className={`admin-status-badge ${user.isApproved ? 'admin-status-approved' : 'admin-status-pending'}`}>
+                                                {user.isApproved ? 'Approuvé' : 'En attente'}
+                                            </span>
+                                        </div>
+                                        <div className="admin-table-col-4">
+                                            <div className="admin-actions-group">
+                                                {user.isApproved ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleToggleAlerts(user.id, user.expirationAlertsEnabled)}
+                                                            className="admin-action-btn admin-action-alert"
+                                                            aria-label={`Alertes pour ${user.fullName}: ${user.expirationAlertsEnabled ? 'Désactiver' : 'Activer'}`}
+                                                            title={user.expirationAlertsEnabled ? 'Désactiver les alertes' : 'Activer les alertes'}
+                                                        >
+                                                            <Bell size={16} />
+                                                            <span className="admin-action-label">
+                                                                {user.expirationAlertsEnabled ? 'ON' : 'OFF'}
+                                                            </span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeny(user.id)}
+                                                            className="admin-action-btn admin-action-delete"
+                                                            aria-label={`Supprimer l'accès de ${user.fullName}`}
+                                                            title="Supprimer"
+                                                        >
+                                                            <UserX size={16} />
+                                                            <span className="admin-action-label">Supprimer</span>
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleApprove(user.id)}
+                                                            className="admin-action-btn admin-action-approve"
+                                                            aria-label={`Approuver l'accès de ${user.fullName}`}
+                                                            title="Approuver"
+                                                        >
+                                                            <span className="admin-action-label">Approuver</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeny(user.id)}
+                                                            className="admin-action-btn admin-action-deny"
+                                                            aria-label={`Refuser l'accès de ${user.fullName}`}
+                                                            title="Refuser"
+                                                        >
+                                                            <span className="admin-action-label">Refuser</span>
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="admin-pagination">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        className="admin-pagination-btn"
+                                        aria-label="Page précédente"
+                                    >
+                                        ← Précédent
+                                    </button>
+                                    <span className="admin-pagination-info">
+                                        Page {currentPage} sur {totalPages}
+                                    </span>
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="admin-pagination-btn"
+                                        aria-label="Page suivante"
+                                    >
+                                        Suivant →
+                                    </button>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

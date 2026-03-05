@@ -230,12 +230,13 @@ const ListEquipment = () => {
                 {filteredEquipments.map((equip) => {
                     const status = getStatus(equip.dateExpiration);
                     return (
-                        <div key={equip.id} className="card card-hover stagger-item">
+                        <div 
+                            key={equip.id} 
+                            className="card card-hover stagger-item cursor-pointer"
+                            onClick={() => navigate(`/equipements/view/${equip.id}`)}
+                        >
                             <div className="flex items-start justify-between gap-4">
-                                <div
-                                    className="flex-1 cursor-pointer"
-                                    onClick={() => navigate(`/equipements/view/${equip.id}`)}
-                                >
+                                <div className="flex-1">
                                     <h3 className="text-lg font-bold text-gray-900 mb-2">
                                         {equip.nom}
                                     </h3>
