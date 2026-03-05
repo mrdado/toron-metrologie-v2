@@ -23,8 +23,15 @@ export default async function handler(request, response) {
     }
 
     try {
-        // 1. Delete from Firebase Authentication
-        await admin.auth().deleteUser(uid);
+        // 1. Delete from Firebase Authentication (ignore if already deleted)
+        try {
+            await admin.auth().deleteUser(uid);
+        } catch (authError) {
+            if (authError.code !== 'auth/user-not-found') {
+                throw authError;
+            }
+            console.warn(`Auth user ${uid} not found — skipping Auth deletion.`);
+        }
 
         // 2. Delete from Firestore (the doc ID equals the Auth UID)
         await admin.firestore().collection('users').doc(uid).delete();
