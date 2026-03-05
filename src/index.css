@@ -1451,7 +1451,7 @@ form.space-y-4 > div + div {
 .admin-actions-group {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .admin-action-btn {
