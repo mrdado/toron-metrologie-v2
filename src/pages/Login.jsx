@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoginCard from '../components/auth/LoginCard';
 import '../styles/MeshBackground.css';
-import emailjs from '@emailjs/browser';
 
 const Login = () => {
     const [error, setError] = useState('');
@@ -46,27 +45,23 @@ const Login = () => {
             await register(email, password, fullName);
             console.log('Login: Registration call in AuthContext completed');
 
-            // Send Admin Notification via EmailJS
+            // Trigger Backend to Notify Admins
             try {
-                const templateParams = {
-                    admin_email: 'mrdado@gmail.com', // Recipient
-                    from_name: 'IPS TestLAB System',
-                    user_name: fullName,
-                    user_email: email,
-                    admin_link: `${window.location.origin}/admin`
-                };
+                console.log('Triggering admin notification API...');
+                const response = await fetch('/api/notify-admins', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, email })
+                });
 
-                console.log('Sending EmailJS with params:', templateParams);
-
-                const response = await emailjs.send(
-                    import.meta.env.VITE_EMAILJS_SERVICE_ID,
-                    import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-                    templateParams,
-                    import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-                );
-                console.log('Email notification sent successfully!', response);
-            } catch (emailErr) {
-                console.error('Email notification failed with error:', emailErr);
+                if (!response.ok) {
+                    const errText = await response.text();
+                    console.error('Admin notification API failed:', errText);
+                } else {
+                    console.log('Admin notification API triggered successfully.');
+                }
+            } catch (apiErr) {
+                console.error('Failed to call admin notification API:', apiErr);
             }
 
             setPendingApproval(true);
