@@ -160,14 +160,22 @@ const AddEquipment = () => {
                 {/* Type */}
                 <div>
                     <label className="input-label">Type d'équipement *</label>
-                    <input
+                    <select
                         name="type"
                         required
-                        placeholder="Type d'équipement"
                         className="form-input"
                         value={formData.type}
                         onChange={handleChange}
-                    />
+                    >
+                        <option value="" disabled>Sélectionner un type</option>
+                        <option value="Acquisition">Acquisition</option>
+                        <option value="Divers">Divers</option>
+                        <option value="Déplacement">Déplacement</option>
+                        <option value="Force">Force</option>
+                        <option value="Machine">Machine</option>
+                        <option value="Pression">Pression</option>
+                        <option value="Température">Température</option>
+                    </select>
                 </div>
 
                 {/* Date d'étalonnage */}
