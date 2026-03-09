@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
                 fullName,
                 email,
                 isApproved: false,
+                isAdmin: false,
                 createdAt: new Date().toISOString()
             });
             console.log('AuthContext: Firestore doc created successfully');
