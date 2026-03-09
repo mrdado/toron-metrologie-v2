@@ -26,12 +26,19 @@ export const AuthProvider = ({ children }) => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        await setDoc(doc(db, 'users', user.uid), {
-            fullName,
-            email,
-            isApproved: false,
-            createdAt: new Date().toISOString()
-        });
+        try {
+            console.log('AuthContext: Creating Firestore doc for', user.uid);
+            await setDoc(doc(db, 'users', user.uid), {
+                fullName,
+                email,
+                isApproved: false,
+                createdAt: new Date().toISOString()
+            });
+            console.log('AuthContext: Firestore doc created successfully');
+        } catch (dbError) {
+            console.error('AuthContext: Error creating Firestore document:', dbError);
+            throw dbError; // Rethrow to let the UI handle it
+        }
 
         return userCredential;
     };
@@ -54,15 +61,29 @@ export const AuthProvider = ({ children }) => {
                 const userDocSnap = await getDoc(userDocRef);
 
                 if (!userDocSnap.exists()) {
-                    // This is a legacy user (exists in Auth but not in Firestore)
-                    // We "grandfather" them in as approved
-                    await setDoc(userDocRef, {
-                        fullName: user.displayName || 'Utilisateur Existant',
-                        email: user.email,
-                        isApproved: true,
-                        isLegacy: true,
-                        createdAt: new Date().toISOString()
-                    });
+                    // Check if this is a brand new user (created in the last 30 seconds)
+                    const creationTime = user.metadata.creationTime ? new Date(user.metadata.creationTime).getTime() : 0;
+                    const now = Date.now();
+                    const isNewUser = (now - creationTime) < 30000;
+
+                    if (!isNewUser) {
+                        // This is a legacy user (exists in Auth but not in Firestore)
+                        // We "grandfather" them in as approved
+                        console.log('AuthContext: Legacy user detected, creating profile for', user.uid);
+                        try {
+                            await setDoc(userDocRef, {
+                                fullName: user.displayName || 'Utilisateur Existant',
+                                email: user.email,
+                                isApproved: true,
+                                isLegacy: true,
+                                createdAt: new Date().toISOString()
+                            });
+                        } catch (setDocError) {
+                            console.error('AuthContext: Error grandfathering user:', setDocError);
+                        }
+                    } else {
+                        console.log('AuthContext: New user detected, skipping legacy profile creation logic');
+                    }
                 }
 
                 // Set up real-time listener for user profile

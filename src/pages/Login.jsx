@@ -44,6 +44,7 @@ const Login = () => {
             setSuccess('');
             setLoading(true);
             await register(email, password, fullName);
+            console.log('Login: Registration call in AuthContext completed');
 
             // Send Admin Notification via EmailJS
             try {
