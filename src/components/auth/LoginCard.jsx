@@ -120,7 +120,7 @@ const LoginCard = ({ onLogin, onRegister, onLogout, onForgotPassword, error, suc
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4 px-6">
                         {!isLogin && (
                             <div>
                                 <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block mb-2">Nom Complet</label>

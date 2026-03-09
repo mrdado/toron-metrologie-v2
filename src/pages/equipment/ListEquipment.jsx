@@ -15,6 +15,20 @@ const ListEquipment = () => {
 
     const { equipements, loading, deleteItem, addEquipment, updateEquipment } = useInventory();
     const [searchTerm, setSearchTerm] = useState('');
+
+    // Map equipment types to badge class names
+    const getEquipmentBadgeClass = (type) => {
+        const typeMap = {
+            'Acquisition': 'badge-acquisition',
+            'Divers': 'badge-divers',
+            'Déplacement': 'badge-deplacement',
+            'Force': 'badge-force',
+            'Machine': 'badge-machine',
+            'Pression': 'badge-pression',
+            'Température': 'badge-temperature'
+        };
+        return typeMap[type] || 'badge-gray';
+    };
     const fileInputRef = React.useRef(null);
 
     const filteredEquipments = useMemo(() => {
@@ -242,13 +256,13 @@ const ListEquipment = () => {
                                     </h3>
 
                                     <div className="flex flex-wrap gap-2 mb-2">
-                                        <span className="badge badge-green">
-                                            {equip.type}
-                                        </span>
-                                        <span className={`badge ${status.className}`}>
-                                            {status.label}
-                                        </span>
-                                    </div>
+                                         <span className={`badge ${getEquipmentBadgeClass(equip.type)}`}>
+                                             {equip.type}
+                                         </span>
+                                         <span className={`badge ${status.className}`}>
+                                             {status.label}
+                                         </span>
+                                     </div>
 
                                     <p className="text-sm text-gray-500">
                                         Expiration: {toDisplayDate(equip.dateExpiration)}

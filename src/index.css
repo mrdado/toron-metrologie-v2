@@ -54,6 +54,22 @@
   --badge-orange-bg: #FFEDD5;
   --badge-orange-text: #EA580C;
 
+  /* Equipment Type Colors - Option 2 (Blue + Gray) */
+  --badge-acquisition-bg: #F0F4F8;
+  --badge-acquisition-text: #1F3A5F;
+  --badge-divers-bg: #E8EDEF;
+  --badge-divers-text: #4A5568;
+  --badge-deplacement-bg: #E0EDFB;
+  --badge-deplacement-text: #2B5B9E;
+  --badge-force-bg: #D9EAFB;
+  --badge-force-text: #1E5A96;
+  --badge-machine-bg: #EEF2F5;
+  --badge-machine-text: #546E7A;
+  --badge-pression-bg: #DFE9F3;
+  --badge-pression-text: #3D5A7D;
+  --badge-temperature-bg: #E3E8F3;
+  --badge-temperature-text: #455A64;
+
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -354,6 +370,42 @@ form.space-y-4 .btn-equipment {
 .badge-orange {
   background: var(--badge-orange-bg);
   color: var(--badge-orange-text);
+}
+
+/* Equipment Type Badges */
+.badge-acquisition {
+  background: var(--badge-acquisition-bg);
+  color: var(--badge-acquisition-text);
+}
+
+.badge-divers {
+  background: var(--badge-divers-bg);
+  color: var(--badge-divers-text);
+}
+
+.badge-deplacement {
+  background: var(--badge-deplacement-bg);
+  color: var(--badge-deplacement-text);
+}
+
+.badge-force {
+  background: var(--badge-force-bg);
+  color: var(--badge-force-text);
+}
+
+.badge-machine {
+  background: var(--badge-machine-bg);
+  color: var(--badge-machine-text);
+}
+
+.badge-pression {
+  background: var(--badge-pression-bg);
+  color: var(--badge-pression-text);
+}
+
+.badge-temperature {
+  background: var(--badge-temperature-bg);
+  color: var(--badge-temperature-text);
 }
 
 /* Form Inputs */
