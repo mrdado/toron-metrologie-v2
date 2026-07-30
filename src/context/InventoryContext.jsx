@@ -13,6 +13,7 @@ import {
 import { db } from '../firebase';
 import { useAuth } from './AuthContext';
 import { uploadCertificate, deleteFiles } from '../utils/blob';
+import { parseAnyDate } from '../utils/dateUtils';
 
 const InventoryContext = createContext();
 
@@ -25,7 +26,7 @@ export const InventoryProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Subscribe to Torons
+    // Subscribe to Torons with automatic real-time data sanitization
     useEffect(() => {
         if (!currentUser) {
             setTorons([]);
@@ -34,10 +35,20 @@ export const InventoryProvider = ({ children }) => {
 
         const q = query(collection(db, 'torons'), orderBy('createdAt', 'desc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const data = snapshot.docs.map(doc => {
+                const raw = doc.data() || {};
+                return {
+                    id: doc.id,
+                    ...raw,
+                    fournisseur: raw.fournisseur !== undefined && raw.fournisseur !== null ? String(raw.fournisseur).trim() : '',
+                    diametre: raw.diametre !== undefined && raw.diametre !== null ? String(raw.diametre).trim() : '',
+                    grade: raw.grade !== undefined && raw.grade !== null ? String(raw.grade).trim() : '',
+                    utilisation: raw.utilisation !== undefined && raw.utilisation !== null ? String(raw.utilisation).trim() : 'Precontrainte',
+                    identification: raw.identification !== undefined && raw.identification !== null ? String(raw.identification).trim() : '',
+                    essais: raw.essais !== undefined && raw.essais !== null ? String(raw.essais).trim() : '',
+                    certificates: Array.isArray(raw.certificates) ? raw.certificates : []
+                };
+            });
             setTorons(data);
         }, (err) => {
             console.error("Error fetching torons:", err);
@@ -45,7 +56,7 @@ export const InventoryProvider = ({ children }) => {
         return () => unsubscribe();
     }, [currentUser]);
 
-    // Subscribe to Equipment
+    // Subscribe to Equipment with automatic real-time data sanitization
     useEffect(() => {
         if (!currentUser) {
             setEquipements([]);
@@ -56,10 +67,19 @@ export const InventoryProvider = ({ children }) => {
         setLoading(true);
         const q = query(collection(db, 'equipements'), orderBy('createdAt', 'desc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const data = snapshot.docs.map(doc => {
+                const raw = doc.data() || {};
+                return {
+                    id: doc.id,
+                    ...raw,
+                    nom: raw.nom !== undefined && raw.nom !== null ? String(raw.nom).trim() : 'Équipement sans nom',
+                    type: raw.type !== undefined && raw.type !== null ? String(raw.type).trim() : 'Divers',
+                    dateCalibration: parseAnyDate(raw.dateCalibration),
+                    dateExpiration: parseAnyDate(raw.dateExpiration),
+                    etalonnage: raw.etalonnage !== undefined && raw.etalonnage !== null ? String(raw.etalonnage).trim() : '',
+                    certificates: Array.isArray(raw.certificates) ? raw.certificates : []
+                };
+            });
             setEquipements(data);
             setLoading(false);
         }, (err) => {
@@ -223,7 +243,7 @@ export const InventoryProvider = ({ children }) => {
 
     const deleteItem = async (type, id) => {
         try {
-            const collectionName = type === 'toron' ? 'torons' : 'equipements';
+            const collectionName = (type === 'toron' || type === 'torons') ? 'torons' : 'equipements';
             const docRef = doc(db, collectionName, id);
 
             const docSnap = await getDoc(docRef);
@@ -236,7 +256,6 @@ export const InventoryProvider = ({ children }) => {
                         await deleteFiles(urls);
                     } catch (fileErr) {
                         console.error("Warning: Failed to delete associated files:", fileErr);
-                        // Continue to delete the document even if file deletion fails
                     }
                 }
             }
