@@ -8,7 +8,7 @@ import {
     sendPasswordResetEmail
 } from 'firebase/auth';
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
@@ -55,82 +55,49 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         let unsubscribeProfile = null;
 
-        // Safety timeout: Never stay stuck on loading for more than 4 seconds
-        const timeoutId = setTimeout(() => {
-            setLoading((prevLoading) => {
-                if (prevLoading) {
-                    console.warn('AuthContext: Auth loading timed out after 4s, forcing loading = false');
-                    return false;
-                }
-                return false;
-            });
-        }, 4000);
-
-        const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
             if (user) {
-                try {
-                    const userDocRef = doc(db, 'users', user.uid);
-                    const userDocSnap = await getDoc(userDocRef).catch(err => {
-                        console.error('AuthContext: Error fetching user doc:', err);
-                        return null;
-                    });
+                const userDocRef = doc(db, 'users', user.uid);
 
-                    if (userDocSnap && !userDocSnap.exists()) {
-                        const creationTime = user.metadata?.creationTime ? new Date(user.metadata.creationTime).getTime() : 0;
-                        const now = Date.now();
-                        const isNewUser = (now - creationTime) < 30000;
+                // Attach onSnapshot directly (single fast network hop)
+                unsubscribeProfile = onSnapshot(
+                    userDocRef,
+                    (docSnap) => {
+                        if (docSnap.exists()) {
+                            setCurrentUser({ ...user, profile: docSnap.data() });
+                        } else {
+                            // Check if legacy user asynchronously without blocking load
+                            const creationTime = user.metadata?.creationTime ? new Date(user.metadata.creationTime).getTime() : 0;
+                            const now = Date.now();
+                            const isNewUser = (now - creationTime) < 30000;
 
-                        if (!isNewUser) {
-                            console.log('AuthContext: Legacy user detected, creating profile for', user.uid);
-                            try {
-                                await setDoc(userDocRef, {
+                            if (!isNewUser) {
+                                setDoc(userDocRef, {
                                     fullName: user.displayName || 'Utilisateur Existant',
                                     email: user.email,
                                     isApproved: true,
                                     isLegacy: true,
                                     createdAt: new Date().toISOString()
-                                });
-                            } catch (setDocError) {
-                                console.error('AuthContext: Error grandfathering user:', setDocError);
+                                }).catch(err => console.error('AuthContext: Error grandfathering user:', err));
                             }
-                        }
-                    }
-
-                    // Set up real-time listener for user profile
-                    unsubscribeProfile = onSnapshot(
-                        userDocRef,
-                        (docSnap) => {
-                            if (docSnap.exists()) {
-                                setCurrentUser({ ...user, profile: docSnap.data() });
-                            } else {
-                                setCurrentUser(user);
-                            }
-                            clearTimeout(timeoutId);
-                            setLoading(false);
-                        },
-                        (profileErr) => {
-                            console.error('AuthContext: Profile snapshot error:', profileErr);
                             setCurrentUser(user);
-                            clearTimeout(timeoutId);
-                            setLoading(false);
                         }
-                    );
-                } catch (authErr) {
-                    console.error('AuthContext: Error inside onAuthStateChanged:', authErr);
-                    setCurrentUser(user);
-                    clearTimeout(timeoutId);
-                    setLoading(false);
-                }
+                        setLoading(false);
+                    },
+                    (profileErr) => {
+                        console.error('AuthContext: Profile snapshot error:', profileErr);
+                        setCurrentUser(user);
+                        setLoading(false);
+                    }
+                );
             } else {
                 if (unsubscribeProfile) unsubscribeProfile();
                 setCurrentUser(null);
-                clearTimeout(timeoutId);
                 setLoading(false);
             }
         });
 
         return () => {
-            clearTimeout(timeoutId);
             unsubscribeAuth();
             if (unsubscribeProfile) unsubscribeProfile();
         };
