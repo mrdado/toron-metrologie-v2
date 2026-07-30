@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { parseAnyDate } from './dateUtils';
 
 export const exportToExcel = (data, fileName) => {
     const ws = XLSX.utils.json_to_sheet(data);
@@ -7,6 +8,40 @@ export const exportToExcel = (data, fileName) => {
     XLSX.writeFile(wb, `${fileName}.xlsx`);
 };
 
+/**
+ * Normalizes Equipment Type strings:
+ * Converts GBE "Capteur de déplacement" -> "Déplacement", "Capteur de pression" -> "Pression", etc.
+ */
+const normalizeEquipmentType = (val) => {
+    if (!val) return 'Divers';
+    let str = String(val).trim();
+
+    // Strip "Capteur de " or "Capteur d'" prefix from GBE exports
+    str = str.replace(/^Capteur\s+de\s+/i, '');
+    str = str.replace(/^Capteur\s+d'/i, '');
+
+    if (!str) return 'Divers';
+    str = str.charAt(0).toUpperCase() + str.slice(1);
+
+    // Map to standard app categories
+    const aliasMap = {
+        'Deplacement': 'Déplacement',
+        'Temperature': 'Température',
+        'Pression': 'Pression',
+        'Force': 'Force',
+        'Machine': 'Machine',
+        'Acquisition': 'Acquisition',
+        'Déplacement': 'Déplacement',
+        'Température': 'Température'
+    };
+
+    return aliasMap[str] || str;
+};
+
+/**
+ * Smart Excel Importer:
+ * Auto-detects header row (line 1 or line 6 from GBE), handles column mapping, and normalizes types/dates.
+ */
 export const importFromExcel = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -21,8 +56,73 @@ export const importFromExcel = (file) => {
                 });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                resolve(jsonData);
+
+                // Read raw array of rows to handle multi-line headers (e.g. GBE files starting at row 6)
+                const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
+                if (!Array.isArray(rawRows) || rawRows.length === 0) {
+                    resolve([]);
+                    return;
+                }
+
+                // Locate header row dynamically within first 20 rows
+                let headerIdx = 0;
+                for (let i = 0; i < Math.min(20, rawRows.length); i++) {
+                    const rowStr = (rawRows[i] || []).join(' ').toLowerCase();
+                    if (
+                        rowStr.includes('numéro') || rowStr.includes('numero') ||
+                        rowStr.includes('type générique') || rowStr.includes('type generique') ||
+                        rowStr.includes('nom') || rowStr.includes('uuid')
+                    ) {
+                        headerIdx = i;
+                        break;
+                    }
+                }
+
+                const headers = (rawRows[headerIdx] || []).map(h => String(h || '').trim());
+                const dataRows = rawRows.slice(headerIdx + 1);
+
+                // Helper to match column index by keywords
+                const findColIdx = (possibleKeywords) => {
+                    return headers.findIndex(h => {
+                        const hLower = h.toLowerCase();
+                        return possibleKeywords.some(kw => hLower.includes(kw.toLowerCase()));
+                    });
+                };
+
+                const colUUID = findColIdx(['uuid', 'id']);
+                const colNom = findColIdx(['numéro', 'numero', 'nom', 'name', 'équipement', 'equipement']);
+                const colType = findColIdx(['type générique', 'type generique', 'type', 'catégorie', 'categorie']);
+                const colCal = findColIdx(['date de création', 'date calibration', 'calibration', 'étalonnage', 'etalonnage']);
+                const colExp = findColIdx(['fin de validité', 'validité', 'expiration']);
+                const colFormula = findColIdx(['facteur de conversion', 'formule', 'etalonnage', 'étalonnage']);
+
+                const parsedItems = [];
+
+                dataRows.forEach(row => {
+                    if (!Array.isArray(row) || row.length === 0) return;
+
+                    // Column D or C or Nom fallback
+                    const rawNom = colNom !== -1 ? row[colNom] : (colUUID !== -1 ? row[colUUID] : undefined);
+                    if (rawNom === undefined || rawNom === null || String(rawNom).trim() === '' || String(rawNom).trim() === 'Numéro') return;
+
+                    const uuid = colUUID !== -1 && row[colUUID] ? String(row[colUUID]).trim() : undefined;
+                    const nom = String(rawNom).trim();
+                    const type = colType !== -1 ? normalizeEquipmentType(row[colType]) : 'Divers';
+                    const dateCalibration = colCal !== -1 ? parseAnyDate(row[colCal]) : '';
+                    const dateExpiration = colExp !== -1 ? parseAnyDate(row[colExp]) : '';
+                    const etalonnage = colFormula !== -1 && row[colFormula] !== undefined && row[colFormula] !== null ? String(row[colFormula]).trim() : '';
+
+                    parsedItems.push({
+                        uuid,
+                        nom,
+                        type,
+                        dateCalibration,
+                        dateExpiration,
+                        etalonnage
+                    });
+                });
+
+                resolve(parsedItems);
             } catch (err) {
                 reject(err);
             }

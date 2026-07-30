@@ -1,26 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { FileSpreadsheet, Upload, Edit, AlertCircle, CheckCircle, Search, QrCode, Archive } from 'lucide-react';
+import { FileSpreadsheet, Upload, Edit, AlertCircle, CheckCircle, Search, QrCode, Archive, RefreshCw } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
 import { toDisplayDate, parseAnyDate } from '../../utils/dateUtils';
 import { exportQRCodesPDF, exportQRCodesZIP } from '../../utils/qrExport';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 import EmptyState from '../../components/ui/EmptyState';
-
-// Helper to retrieve column values from Excel row case-insensitively and space-trimmed
-const getExcelField = (row, possibleNames) => {
-    if (!row || typeof row !== 'object') return undefined;
-    const rowKeys = Object.keys(row);
-    for (const name of possibleNames) {
-        const target = name.trim().toLowerCase();
-        const matchedKey = rowKeys.find(k => k.trim().toLowerCase() === target);
-        if (matchedKey && row[matchedKey] !== undefined && row[matchedKey] !== null) {
-            return row[matchedKey];
-        }
-    }
-    return undefined;
-};
+import SyncPreviewModal from '../../components/features/SyncPreviewModal';
 
 const ListEquipment = () => {
     const navigate = useNavigate();
@@ -31,6 +18,11 @@ const ListEquipment = () => {
     const { equipements, loading, deleteItem, addEquipment, updateEquipment } = useInventory();
     const [searchTerm, setSearchTerm] = useState('');
     const fileInputRef = React.useRef(null);
+
+    // Sync Modal State
+    const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+    const [syncDiffData, setSyncDiffData] = useState(null);
+    const [isSyncProcessing, setIsSyncProcessing] = useState(false);
 
     // Map equipment types to badge class names
     const getEquipmentBadgeClass = (type) => {
@@ -50,7 +42,6 @@ const ListEquipment = () => {
     const filteredEquipments = useMemo(() => {
         let results = equipements;
 
-        // Apply filter from query params
         if (filterType === 'expired') {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -62,7 +53,6 @@ const ListEquipment = () => {
             });
         }
 
-        // Apply search term safely (coercing e.nom to string)
         const searchLower = String(searchTerm || '').toLowerCase();
         return results.filter(e =>
             String(e.nom || '').toLowerCase().includes(searchLower)
@@ -117,87 +107,120 @@ const ListEquipment = () => {
         fileInputRef.current?.click();
     };
 
+    /**
+     * Handles file upload from Corporate Software (GBE) or standard App exports.
+     * Computes diff and opens interactive review modal.
+     */
     const handleFileChange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         try {
-            const data = await importFromExcel(file);
-            if (!Array.isArray(data) || data.length === 0) {
+            const parsedItems = await importFromExcel(file);
+            if (!Array.isArray(parsedItems) || parsedItems.length === 0) {
                 alert("Le fichier Excel semble vide ou illisible.");
                 return;
             }
 
-            // Build a Set of UUIDs from the Excel file (case-insensitive UUID field check)
-            const excelUUIDs = new Set(
-                data
-                    .map(row => getExcelField(row, ['UUID', 'uuid', 'id', 'ID']))
-                    .filter(Boolean)
-                    .map(val => String(val).trim())
-            );
+            const toAdd = [];
+            const toUpdate = [];
+            const matchedAppIds = new Set();
+            let unchangedCount = 0;
 
-            // Find items in DB that are NOT in the Excel file => to be deleted
-            const toDelete = excelUUIDs.size > 0
-                ? equipements.filter(eq => !excelUUIDs.has(eq.id))
-                : [];
-
-            // Show confirmation dialog
-            if (toDelete.length > 0) {
-                const confirmed = window.confirm(
-                    `Attention: Cette synchronisation va:\n` +
-                    `- Mettre à jour / Ajouter les équipements du fichier Excel\n` +
-                    `- Supprimer ${toDelete.length} équipement(s) absent(s) du fichier Excel:\n` +
-                    toDelete.slice(0, 5).map(eq => `  • ${eq.nom || eq.id}`).join('\n') +
-                    (toDelete.length > 5 ? `\n  ... et ${toDelete.length - 5} autre(s)` : '') +
-                    `\n\nContinuer ?`
+            for (const item of parsedItems) {
+                // Match by UUID if present, or by Nom (case-insensitive)
+                const matchedEq = equipements.find(eq =>
+                    (item.uuid && String(eq.id).trim().toLowerCase() === item.uuid.toLowerCase()) ||
+                    (String(eq.nom || '').trim().toLowerCase() === String(item.nom || '').trim().toLowerCase())
                 );
-                if (!confirmed) {
-                    e.target.value = null;
-                    return;
-                }
-            } else {
-                if (!window.confirm("Attention: L'importation va modifier la base de données. Continuer ?")) {
-                    e.target.value = null;
-                    return;
+
+                if (matchedEq) {
+                    matchedAppIds.add(matchedEq.id);
+
+                    const changes = {};
+                    if (item.type && item.type !== matchedEq.type) {
+                        changes.type = { old: matchedEq.type, new: item.type };
+                    }
+                    if (item.dateCalibration && item.dateCalibration !== matchedEq.dateCalibration) {
+                        changes.dateCalibration = { old: matchedEq.dateCalibration, new: item.dateCalibration };
+                    }
+                    if (item.dateExpiration && item.dateExpiration !== matchedEq.dateExpiration) {
+                        changes.dateExpiration = { old: matchedEq.dateExpiration, new: item.dateExpiration };
+                    }
+                    if (item.etalonnage !== undefined && item.etalonnage !== matchedEq.etalonnage) {
+                        changes.etalonnage = { old: matchedEq.etalonnage, new: item.etalonnage };
+                    }
+
+                    if (Object.keys(changes).length > 0) {
+                        toUpdate.push({
+                            id: matchedEq.id,
+                            nom: item.nom || matchedEq.nom,
+                            data: {
+                                nom: item.nom || matchedEq.nom,
+                                type: item.type || matchedEq.type,
+                                dateCalibration: item.dateCalibration || matchedEq.dateCalibration || '',
+                                dateExpiration: item.dateExpiration || matchedEq.dateExpiration || '',
+                                etalonnage: item.etalonnage !== undefined ? item.etalonnage : (matchedEq.etalonnage || '')
+                            },
+                            changes
+                        });
+                    } else {
+                        unchangedCount++;
+                    }
+                } else {
+                    toAdd.push({
+                        nom: item.nom,
+                        type: item.type || 'Divers',
+                        dateCalibration: item.dateCalibration || '',
+                        dateExpiration: item.dateExpiration || '',
+                        etalonnage: item.etalonnage || ''
+                    });
                 }
             }
 
+            // Items in app absent from uploaded file
+            const toDelete = equipements.filter(eq => !matchedAppIds.has(eq.id));
+
+            setSyncDiffData({ toAdd, toUpdate, toDelete, unchangedCount });
+            setIsSyncModalOpen(true);
+
+        } catch (err) {
+            console.error("Erreur lors de la lecture du fichier Excel:", err);
+            alert("Erreur lors de la lecture du fichier : " + err.message);
+        } finally {
+            e.target.value = null;
+        }
+    };
+
+    /**
+     * Executes the batch database operations after user confirmation in SyncPreviewModal.
+     */
+    const handleConfirmSync = async (confirmedDiff) => {
+        setIsSyncProcessing(true);
+        try {
             let created = 0;
             let updated = 0;
             let deleted = 0;
 
-            // Step 1: Update existing items or add new ones
-            for (const row of data) {
-                const rawNom = getExcelField(row, ['Nom', 'nom', 'Name', 'name', 'Equipement', 'équipement']);
-                const rawType = getExcelField(row, ['Type', 'type', 'Categorie', 'catégorie']);
-                const rawEtalonnage = getExcelField(row, ['Etalonnage', 'étalonnage', 'Formula', 'formula']);
-                const rawUUID = getExcelField(row, ['UUID', 'uuid', 'id', 'ID']);
-
-                const itemData = {
-                    nom: rawNom !== undefined ? String(rawNom).trim() : 'Équipement sans nom',
-                    type: rawType !== undefined ? String(rawType).trim() : 'Divers',
-                    dateCalibration: parseAnyDate(getExcelField(row, ['DateCalibration', 'dateCalibration', 'Date Calibration', 'date_calibration', 'Date d\'étalonnage'])),
-                    dateExpiration: parseAnyDate(getExcelField(row, ['DateExpiration', 'dateExpiration', 'Date Expiration', 'date_expiration', 'Date d\'expiration'])),
-                    etalonnage: rawEtalonnage !== undefined ? String(rawEtalonnage).trim() : ''
-                };
-
-                const cleanUUID = rawUUID ? String(rawUUID).trim() : null;
-
-                if (cleanUUID && equipements.some(eq => eq.id === cleanUUID)) {
-                    await updateEquipment(cleanUUID, itemData);
-                    updated++;
-                } else {
-                    await addEquipment(itemData);
-                    created++;
-                }
+            // 1. Add new items
+            for (const item of confirmedDiff.toAdd) {
+                await addEquipment(item);
+                created++;
             }
 
-            // Step 2: Delete items that were explicitly excluded in a full UUID sync file
-            for (const item of toDelete) {
+            // 2. Update changed items
+            for (const item of confirmedDiff.toUpdate) {
+                await updateEquipment(item.id, item.data);
+                updated++;
+            }
+
+            // 3. Delete obsolete items
+            for (const item of confirmedDiff.toDelete) {
                 await deleteItem('equipment', item.id);
                 deleted++;
             }
 
+            setIsSyncModalOpen(false);
             alert(
                 `Synchronisation réussie !\n` +
                 `✔ Créés: ${created}\n` +
@@ -205,15 +228,24 @@ const ListEquipment = () => {
                 `🗑 Supprimés: ${deleted}`
             );
         } catch (err) {
-            console.error("Erreur lors de la synchronisation Excel:", err);
+            console.error("Erreur lors de l'application de la synchronisation:", err);
             alert("Erreur lors de la synchronisation : " + err.message);
         } finally {
-            e.target.value = null;
+            setIsSyncProcessing(false);
         }
     };
 
     return (
         <div className="pb-8">
+            {/* Sync Preview Modal */}
+            <SyncPreviewModal
+                isOpen={isSyncModalOpen}
+                onClose={() => setIsSyncModalOpen(false)}
+                diffData={syncDiffData}
+                onConfirm={handleConfirmSync}
+                isProcessing={isSyncProcessing}
+            />
+
             {/* Action Bar */}
             <div className="flex flex-wrap items-center justify-end gap-2 mb-6">
                 <button onClick={handleExportPDF} className="btn btn-equipment btn-sm">
@@ -228,9 +260,9 @@ const ListEquipment = () => {
                     <FileSpreadsheet size={18} />
                     Excel
                 </button>
-                <button onClick={handleImportClick} className="btn btn-outline btn-sm">
+                <button onClick={handleImportClick} className="btn btn-outline btn-sm flex items-center gap-2">
                     <Upload size={18} />
-                    Synchroniser Excel
+                    Synchroniser GBE / Excel
                 </button>
                 <input
                     type="file"
@@ -303,8 +335,8 @@ const ListEquipment = () => {
                     const displayType = String(equip.type || 'Divers');
 
                     return (
-                        <div 
-                            key={equip.id} 
+                        <div
+                            key={equip.id}
                             className="card card-hover stagger-item cursor-pointer"
                             onClick={() => navigate(`/equipements/view/${equip.id}`)}
                         >
@@ -315,13 +347,13 @@ const ListEquipment = () => {
                                     </h3>
 
                                     <div className="flex flex-wrap gap-2 mb-2">
-                                         <span className={`badge ${getEquipmentBadgeClass(displayType)}`}>
-                                             {displayType}
-                                         </span>
-                                         <span className={`badge ${status.className}`}>
-                                             {status.label}
-                                         </span>
-                                     </div>
+                                        <span className={`badge ${getEquipmentBadgeClass(displayType)}`}>
+                                            {displayType}
+                                        </span>
+                                        <span className={`badge ${status.className}`}>
+                                            {status.label}
+                                        </span>
+                                    </div>
 
                                     <p className="text-sm text-gray-500">
                                         Expiration: {toDisplayDate(equip.dateExpiration) || 'N/A'}
