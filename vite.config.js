@@ -9,6 +9,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true
+      },
       manifest: {
         short_name: 'IPS Inventory',
         name: 'IPS TestLAB - Gestion d\'Inventaire',
