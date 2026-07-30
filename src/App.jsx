@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/layout/PrivateRoute';
+import ErrorBoundary from './components/layout/ErrorBoundary';
 import Login from './pages/Login';
 import Layout from './components/layout/Layout';
 import HomeLayout from './components/layout/HomeLayout';
@@ -66,106 +67,108 @@ const HomeWithStats = () => {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <InventoryProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
+      <ErrorBoundary>
+        <AuthProvider>
+          <InventoryProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
 
-            <Route path="/" element={
-              <PrivateRoute>
-                <HomeWithStats />
-              </PrivateRoute>
-            } />
+              <Route path="/" element={
+                <PrivateRoute>
+                  <HomeWithStats />
+                </PrivateRoute>
+              } />
 
-            <Route path="/scan" element={
-              <PrivateRoute>
-                <Layout>
-                  <ScanGlobal />
-                </Layout>
-              </PrivateRoute>
-            } />
+              <Route path="/scan" element={
+                <PrivateRoute>
+                  <Layout>
+                    <ScanGlobal />
+                  </Layout>
+                </PrivateRoute>
+              } />
 
-            {/* Toron Routes */}
-            <Route path="/torons/scan" element={
-              <PrivateRoute>
-                <Layout>
-                  <ScanToron />
-                </Layout>
-              </PrivateRoute>
-            } />
-            <Route path="/torons/add" element={
-              <PrivateRoute>
-                <Layout>
-                  <AddToron />
-                </Layout>
-              </PrivateRoute>
-            } />
-            <Route path="/torons/edit/:id" element={
-              <PrivateRoute>
-                <Layout>
-                  <EditToron />
-                </Layout>
-              </PrivateRoute>
-            } />
-            <Route path="/torons/edit" element={
-              <PrivateRoute>
-                <Layout>
-                  <ListToron />
-                </Layout>
-              </PrivateRoute>
-            } />
-            <Route path="/torons/view/:id" element={
-              <PrivateRoute>
-                <Layout>
-                  <ViewToron />
-                </Layout>
-              </PrivateRoute>
-            } />
+              {/* Toron Routes */}
+              <Route path="/torons/scan" element={
+                <PrivateRoute>
+                  <Layout>
+                    <ScanToron />
+                  </Layout>
+                </PrivateRoute>
+              } />
+              <Route path="/torons/add" element={
+                <PrivateRoute>
+                  <Layout>
+                    <AddToron />
+                  </Layout>
+                </PrivateRoute>
+              } />
+              <Route path="/torons/edit/:id" element={
+                <PrivateRoute>
+                  <Layout>
+                    <EditToron />
+                  </Layout>
+                </PrivateRoute>
+              } />
+              <Route path="/torons/edit" element={
+                <PrivateRoute>
+                  <Layout>
+                    <ListToron />
+                  </Layout>
+                </PrivateRoute>
+              } />
+              <Route path="/torons/view/:id" element={
+                <PrivateRoute>
+                  <Layout>
+                    <ViewToron />
+                  </Layout>
+                </PrivateRoute>
+              } />
 
-            {/* Equipment Routes */}
-            <Route path="/equipements/scan" element={
-              <PrivateRoute>
-                <Layout>
-                  <ScanGlobal />
-                </Layout>
-              </PrivateRoute>
-            } />
-            <Route path="/equipements/add" element={
-              <PrivateRoute>
-                <Layout>
-                  <AddEquipment />
-                </Layout>
-              </PrivateRoute>
-            } />
-            <Route path="/equipements/edit/:id" element={
-              <PrivateRoute>
-                <Layout>
-                  <EditEquipment />
-                </Layout>
-              </PrivateRoute>
-            } />
-            <Route path="/equipements/edit" element={
-              <PrivateRoute>
-                <Layout>
-                  <ListEquipment />
-                </Layout>
-              </PrivateRoute>
-            } />
-            <Route path="/equipements/view/:id" element={
-              <PrivateRoute>
-                <Layout>
-                  <ViewEquipment />
-                </Layout>
-              </PrivateRoute>
-            } />
-            <Route path="/admin" element={
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            } />
-          </Routes>
-        </InventoryProvider>
-      </AuthProvider>
+              {/* Equipment Routes */}
+              <Route path="/equipements/scan" element={
+                <PrivateRoute>
+                  <Layout>
+                    <ScanGlobal />
+                  </Layout>
+                </PrivateRoute>
+              } />
+              <Route path="/equipements/add" element={
+                <PrivateRoute>
+                  <Layout>
+                    <AddEquipment />
+                  </Layout>
+                </PrivateRoute>
+              } />
+              <Route path="/equipements/edit/:id" element={
+                <PrivateRoute>
+                  <Layout>
+                    <EditEquipment />
+                  </Layout>
+                </PrivateRoute>
+              } />
+              <Route path="/equipements/edit" element={
+                <PrivateRoute>
+                  <Layout>
+                    <ListEquipment />
+                  </Layout>
+                </PrivateRoute>
+              } />
+              <Route path="/equipements/view/:id" element={
+                <PrivateRoute>
+                  <Layout>
+                    <ViewEquipment />
+                  </Layout>
+                </PrivateRoute>
+              } />
+              <Route path="/admin" element={
+                <PrivateRoute>
+                  <AdminDashboard />
+                </PrivateRoute>
+              } />
+            </Routes>
+          </InventoryProvider>
+        </AuthProvider>
+      </ErrorBoundary>
     </Router>
   );
 }

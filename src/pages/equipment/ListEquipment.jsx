@@ -7,6 +7,20 @@ import { toDisplayDate, parseAnyDate } from '../../utils/dateUtils';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 import EmptyState from '../../components/ui/EmptyState';
 
+// Helper to retrieve column values from Excel row case-insensitively and space-trimmed
+const getExcelField = (row, possibleNames) => {
+    if (!row || typeof row !== 'object') return undefined;
+    const rowKeys = Object.keys(row);
+    for (const name of possibleNames) {
+        const target = name.trim().toLowerCase();
+        const matchedKey = rowKeys.find(k => k.trim().toLowerCase() === target);
+        if (matchedKey && row[matchedKey] !== undefined && row[matchedKey] !== null) {
+            return row[matchedKey];
+        }
+    }
+    return undefined;
+};
+
 const ListEquipment = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -15,9 +29,11 @@ const ListEquipment = () => {
 
     const { equipements, loading, deleteItem, addEquipment, updateEquipment } = useInventory();
     const [searchTerm, setSearchTerm] = useState('');
+    const fileInputRef = React.useRef(null);
 
     // Map equipment types to badge class names
     const getEquipmentBadgeClass = (type) => {
+        const strType = String(type || '');
         const typeMap = {
             'Acquisition': 'badge-acquisition',
             'Divers': 'badge-divers',
@@ -27,9 +43,8 @@ const ListEquipment = () => {
             'Pression': 'badge-pression',
             'Température': 'badge-temperature'
         };
-        return typeMap[type] || 'badge-gray';
+        return typeMap[strType] || 'badge-gray';
     };
-    const fileInputRef = React.useRef(null);
 
     const filteredEquipments = useMemo(() => {
         let results = equipements;
@@ -42,13 +57,14 @@ const ListEquipment = () => {
                 if (!e.dateExpiration) return false;
                 const expDate = new Date(e.dateExpiration);
                 expDate.setHours(0, 0, 0, 0);
-                return expDate < today;
+                return !isNaN(expDate.getTime()) && expDate < today;
             });
         }
 
-        // Apply search term
+        // Apply search term safely (coercing e.nom to string)
+        const searchLower = String(searchTerm || '').toLowerCase();
         return results.filter(e =>
-            e.nom?.toLowerCase().includes(searchTerm.toLowerCase())
+            String(e.nom || '').toLowerCase().includes(searchLower)
         );
     }, [equipements, searchTerm, filterType]);
 
@@ -59,6 +75,10 @@ const ListEquipment = () => {
         today.setHours(0, 0, 0, 0);
         const expDate = new Date(dateExpiration);
         expDate.setHours(0, 0, 0, 0);
+
+        if (isNaN(expDate.getTime())) {
+            return { label: 'N/A', className: 'badge-gray', icon: AlertCircle };
+        }
 
         const diffTime = expDate - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -75,11 +95,11 @@ const ListEquipment = () => {
     const handleExport = () => {
         const dataToExport = filteredEquipments.map(e => ({
             UUID: e.id,
-            Nom: e.nom,
-            Type: e.type,
+            Nom: String(e.nom || ''),
+            Type: String(e.type || ''),
             DateCalibration: toDisplayDate(e.dateCalibration),
             DateExpiration: toDisplayDate(e.dateExpiration),
-            Etalonnage: e.etalonnage
+            Etalonnage: String(e.etalonnage || '')
         }));
         exportToExcel(dataToExport, `Inventaire_Equipements_${new Date().toISOString().split('T')[0]}`);
     };
@@ -94,20 +114,32 @@ const ListEquipment = () => {
 
         try {
             const data = await importFromExcel(file);
+            if (!Array.isArray(data) || data.length === 0) {
+                alert("Le fichier Excel semble vide ou illisible.");
+                return;
+            }
 
-            // Build a Set of UUIDs from the Excel file (only rows that have a UUID)
-            const excelUUIDs = new Set(data.filter(row => row.UUID).map(row => String(row.UUID)));
+            // Build a Set of UUIDs from the Excel file (case-insensitive UUID field check)
+            const excelUUIDs = new Set(
+                data
+                    .map(row => getExcelField(row, ['UUID', 'uuid', 'id', 'ID']))
+                    .filter(Boolean)
+                    .map(val => String(val).trim())
+            );
 
             // Find items in DB that are NOT in the Excel file => to be deleted
-            const toDelete = equipements.filter(eq => !excelUUIDs.has(eq.id));
+            const toDelete = excelUUIDs.size > 0
+                ? equipements.filter(eq => !excelUUIDs.has(eq.id))
+                : [];
 
-            // Show a detailed confirmation dialog
+            // Show confirmation dialog
             if (toDelete.length > 0) {
                 const confirmed = window.confirm(
                     `Attention: Cette synchronisation va:\n` +
                     `- Mettre à jour / Ajouter les équipements du fichier Excel\n` +
                     `- Supprimer ${toDelete.length} équipement(s) absent(s) du fichier Excel:\n` +
-                    toDelete.map(eq => `  • ${eq.nom || eq.id}`).join('\n') +
+                    toDelete.slice(0, 5).map(eq => `  • ${eq.nom || eq.id}`).join('\n') +
+                    (toDelete.length > 5 ? `\n  ... et ${toDelete.length - 5} autre(s)` : '') +
                     `\n\nContinuer ?`
                 );
                 if (!confirmed) {
@@ -127,16 +159,23 @@ const ListEquipment = () => {
 
             // Step 1: Update existing items or add new ones
             for (const row of data) {
+                const rawNom = getExcelField(row, ['Nom', 'nom', 'Name', 'name', 'Equipement', 'équipement']);
+                const rawType = getExcelField(row, ['Type', 'type', 'Categorie', 'catégorie']);
+                const rawEtalonnage = getExcelField(row, ['Etalonnage', 'étalonnage', 'Formula', 'formula']);
+                const rawUUID = getExcelField(row, ['UUID', 'uuid', 'id', 'ID']);
+
                 const itemData = {
-                    nom: row.Nom || '',
-                    type: row.Type || '',
-                    dateCalibration: parseAnyDate(row.DateCalibration),
-                    dateExpiration: parseAnyDate(row.DateExpiration),
-                    etalonnage: row.Etalonnage || ''
+                    nom: rawNom !== undefined ? String(rawNom).trim() : 'Équipement sans nom',
+                    type: rawType !== undefined ? String(rawType).trim() : 'Divers',
+                    dateCalibration: parseAnyDate(getExcelField(row, ['DateCalibration', 'dateCalibration', 'Date Calibration', 'date_calibration', 'Date d\'étalonnage'])),
+                    dateExpiration: parseAnyDate(getExcelField(row, ['DateExpiration', 'dateExpiration', 'Date Expiration', 'date_expiration', 'Date d\'expiration'])),
+                    etalonnage: rawEtalonnage !== undefined ? String(rawEtalonnage).trim() : ''
                 };
 
-                if (row.UUID && equipements.some(eq => eq.id === String(row.UUID))) {
-                    await updateEquipment(String(row.UUID), itemData);
+                const cleanUUID = rawUUID ? String(rawUUID).trim() : null;
+
+                if (cleanUUID && equipements.some(eq => eq.id === cleanUUID)) {
+                    await updateEquipment(cleanUUID, itemData);
                     updated++;
                 } else {
                     await addEquipment(itemData);
@@ -144,7 +183,7 @@ const ListEquipment = () => {
                 }
             }
 
-            // Step 2: Delete items that are in the DB but not in the Excel file
+            // Step 2: Delete items that were explicitly excluded in a full UUID sync file
             for (const item of toDelete) {
                 await deleteItem('equipment', item.id);
                 deleted++;
@@ -157,7 +196,7 @@ const ListEquipment = () => {
                 `🗑 Supprimés: ${deleted}`
             );
         } catch (err) {
-            console.error(err);
+            console.error("Erreur lors de la synchronisation Excel:", err);
             alert("Erreur lors de la synchronisation : " + err.message);
         } finally {
             e.target.value = null;
@@ -243,6 +282,9 @@ const ListEquipment = () => {
 
                 {filteredEquipments.map((equip) => {
                     const status = getStatus(equip.dateExpiration);
+                    const displayName = String(equip.nom || 'Équipement sans nom');
+                    const displayType = String(equip.type || 'Divers');
+
                     return (
                         <div 
                             key={equip.id} 
@@ -252,12 +294,12 @@ const ListEquipment = () => {
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1">
                                     <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                        {equip.nom}
+                                        {displayName}
                                     </h3>
 
                                     <div className="flex flex-wrap gap-2 mb-2">
-                                         <span className={`badge ${getEquipmentBadgeClass(equip.type)}`}>
-                                             {equip.type}
+                                         <span className={`badge ${getEquipmentBadgeClass(displayType)}`}>
+                                             {displayType}
                                          </span>
                                          <span className={`badge ${status.className}`}>
                                              {status.label}
@@ -265,9 +307,9 @@ const ListEquipment = () => {
                                      </div>
 
                                     <p className="text-sm text-gray-500">
-                                        Expiration: {toDisplayDate(equip.dateExpiration)}
+                                        Expiration: {toDisplayDate(equip.dateExpiration) || 'N/A'}
                                     </p>
-                                    {equip.certificates && equip.certificates.length > 0 && (
+                                    {Array.isArray(equip.certificates) && equip.certificates.length > 0 && (
                                         <div className="mt-2 text-teal-600 font-medium text-xs flex items-center gap-1">
                                             <Upload size={12} />
                                             {equip.certificates.length} {equip.certificates.length > 1 ? 'fichiers' : 'fichier'}

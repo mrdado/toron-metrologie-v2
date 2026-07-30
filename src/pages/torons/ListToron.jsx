@@ -6,6 +6,20 @@ import { exportToExcel, importFromExcel } from '../../utils/excel';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 import EmptyState from '../../components/ui/EmptyState';
 
+// Helper to retrieve column values from Excel row case-insensitively and space-trimmed
+const getExcelField = (row, possibleNames) => {
+    if (!row || typeof row !== 'object') return undefined;
+    const rowKeys = Object.keys(row);
+    for (const name of possibleNames) {
+        const target = name.trim().toLowerCase();
+        const matchedKey = rowKeys.find(k => k.trim().toLowerCase() === target);
+        if (matchedKey && row[matchedKey] !== undefined && row[matchedKey] !== null) {
+            return row[matchedKey];
+        }
+    }
+    return undefined;
+};
+
 const ListToron = () => {
     const navigate = useNavigate();
     const { torons, loading, deleteItem, addToron, updateToron } = useInventory();
@@ -13,21 +27,22 @@ const ListToron = () => {
     const fileInputRef = React.useRef(null);
 
     const filteredTorons = useMemo(() => {
+        const term = String(searchTerm || '').toLowerCase();
         return torons.filter(t =>
-            t.fournisseur?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            t.identification?.toLowerCase().includes(searchTerm.toLowerCase())
+            String(t.fournisseur || '').toLowerCase().includes(term) ||
+            String(t.identification || '').toLowerCase().includes(term)
         );
     }, [torons, searchTerm]);
 
     const handleExport = () => {
         const dataToExport = filteredTorons.map(t => ({
             UUID: t.id,
-            Fournisseur: t.fournisseur,
-            Diametre: t.diametre,
-            Grade: t.grade,
-            Utilisation: t.utilisation,
-            Identification: t.identification,
-            Essais: t.essais
+            Fournisseur: String(t.fournisseur || ''),
+            Diametre: String(t.diametre || ''),
+            Grade: String(t.grade || ''),
+            Utilisation: String(t.utilisation || ''),
+            Identification: String(t.identification || ''),
+            Essais: String(t.essais || '')
         }));
         exportToExcel(dataToExport, `Inventaire_Torons_${new Date().toISOString().split('T')[0]}`);
     };
@@ -47,21 +62,36 @@ const ListToron = () => {
 
         try {
             const data = await importFromExcel(file);
+            if (!Array.isArray(data) || data.length === 0) {
+                alert("Le fichier Excel semble vide ou illisible.");
+                return;
+            }
+
             let created = 0;
             let updated = 0;
 
             for (const row of data) {
+                const rawFournisseur = getExcelField(row, ['Fournisseur', 'fournisseur', 'Supplier']);
+                const rawDiametre = getExcelField(row, ['Diametre', 'diametre', 'Diamètre', 'Diameter']);
+                const rawGrade = getExcelField(row, ['Grade', 'grade']);
+                const rawUtilisation = getExcelField(row, ['Utilisation', 'utilisation', 'Use']);
+                const rawIdentification = getExcelField(row, ['Identification', 'identification', 'ID', 'Id']);
+                const rawEssais = getExcelField(row, ['Essais', 'essais', 'Tests']);
+                const rawUUID = getExcelField(row, ['UUID', 'uuid', 'id', 'ID']);
+
                 const itemData = {
-                    fournisseur: row.Fournisseur || '',
-                    diametre: row.Diametre || '',
-                    grade: row.Grade || '',
-                    utilisation: row.Utilisation || 'Precontrainte',
-                    identification: row.Identification || '',
-                    essais: row.Essais || ''
+                    fournisseur: rawFournisseur !== undefined ? String(rawFournisseur).trim() : '',
+                    diametre: rawDiametre !== undefined ? String(rawDiametre).trim() : '',
+                    grade: rawGrade !== undefined ? String(rawGrade).trim() : '',
+                    utilisation: rawUtilisation !== undefined ? String(rawUtilisation).trim() : 'Precontrainte',
+                    identification: rawIdentification !== undefined ? String(rawIdentification).trim() : '',
+                    essais: rawEssais !== undefined ? String(rawEssais).trim() : ''
                 };
 
-                if (row.UUID && torons.some(t => t.id === row.UUID)) {
-                    await updateToron(row.UUID, itemData);
+                const cleanUUID = rawUUID ? String(rawUUID).trim() : null;
+
+                if (cleanUUID && torons.some(t => t.id === cleanUUID)) {
+                    await updateToron(cleanUUID, itemData);
                     updated++;
                 } else {
                     await addToron(itemData);
@@ -70,7 +100,7 @@ const ListToron = () => {
             }
             alert(`Importation réussie !\nCréés: ${created}\nMis à jour: ${updated}`);
         } catch (err) {
-            console.error(err);
+            console.error("Erreur d'importation Toron:", err);
             alert("Erreur lors de l'importation : " + err.message);
         } finally {
             e.target.value = null;
@@ -154,7 +184,7 @@ const ListToron = () => {
                     />
                 )}
 
-                {filteredTorons.map((toron, index) => (
+                {filteredTorons.map((toron) => (
                     <div 
                         key={toron.id} 
                         className="card card-hover stagger-item cursor-pointer"
@@ -163,29 +193,35 @@ const ListToron = () => {
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                    {toron.fournisseur}
+                                    {String(toron.fournisseur || 'Toron sans nom')}
                                 </h3>
 
                                 <div className="flex flex-wrap gap-2 mb-2">
-                                    <span className="badge badge-gray">
-                                        {toron.diametre}
-                                    </span>
-                                    <span className="badge badge-blue">
-                                        {toron.grade}
-                                    </span>
-                                    <span className="badge badge-purple">
-                                        {toron.utilisation}
-                                    </span>
+                                    {toron.diametre && (
+                                        <span className="badge badge-gray">
+                                            {String(toron.diametre)}
+                                        </span>
+                                    )}
+                                    {toron.grade && (
+                                        <span className="badge badge-blue">
+                                            {String(toron.grade)}
+                                        </span>
+                                    )}
+                                    {toron.utilisation && (
+                                        <span className="badge badge-purple">
+                                            {String(toron.utilisation)}
+                                        </span>
+                                    )}
                                 </div>
 
                                 <div className="flex items-center gap-3">
                                     <p className="text-sm text-gray-500">
-                                        ID: {toron.identification}
+                                        ID: {String(toron.identification || 'N/A')}
                                     </p>
-                                    {toron.certificates && toron.certificates.length > 0 && (
+                                    {Array.isArray(toron.certificates) && toron.certificates.length > 0 && (
                                         <span className="flex items-center gap-1 text-blue-600 font-medium text-xs bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
                                             <Upload size={12} />
-                                            {toron.certificates.length} {toron.certificates.length > 1 ? 'arquivos' : 'arquivo'}
+                                            {toron.certificates.length} {toron.certificates.length > 1 ? 'fichiers' : 'fichier'}
                                         </span>
                                     )}
                                 </div>
