@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { FileSpreadsheet, Upload, Edit, AlertCircle, CheckCircle, Search, QrCode, Archive, RefreshCw } from 'lucide-react';
+import { FileSpreadsheet, Upload, Edit, AlertCircle, CheckCircle, Search, QrCode, Archive, RefreshCw, Trash2 } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
 import { toDisplayDate, parseAnyDate } from '../../utils/dateUtils';
 import { exportQRCodesPDF, exportQRCodesZIP } from '../../utils/qrExport';
@@ -23,6 +23,16 @@ const ListEquipment = () => {
     const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
     const [syncDiffData, setSyncDiffData] = useState(null);
     const [isSyncProcessing, setIsSyncProcessing] = useState(false);
+
+    // Count empty/invalid equipments created by legacy sync
+    const emptyEquipmentsCount = useMemo(() => {
+        return equipements.filter(e =>
+            !e.nom ||
+            String(e.nom).trim() === '' ||
+            String(e.nom).trim() === 'Équipement sans nom' ||
+            String(e.nom).trim() === 'Numéro'
+        ).length;
+    }, [equipements]);
 
     // Map equipment types to badge class names
     const getEquipmentBadgeClass = (type) => {
@@ -108,6 +118,38 @@ const ListEquipment = () => {
     };
 
     /**
+     * Cleans up all empty / "Équipement sans nom" items created by legacy sync attempts.
+     */
+    const handleCleanupEmpty = async () => {
+        const emptyItems = equipements.filter(e =>
+            !e.nom ||
+            String(e.nom).trim() === '' ||
+            String(e.nom).trim() === 'Équipement sans nom' ||
+            String(e.nom).trim() === 'Numéro'
+        );
+
+        if (emptyItems.length === 0) {
+            alert("Aucun équipement vide à nettoyer.");
+            return;
+        }
+
+        const confirmed = window.confirm(
+            `Nettoyage de la base de données:\n` +
+            `Voulez-vous supprimer les ${emptyItems.length} équipement(s) vides / sans nom ?`
+        );
+
+        if (!confirmed) return;
+
+        let deleted = 0;
+        for (const item of emptyItems) {
+            await deleteItem('equipment', item.id);
+            deleted++;
+        }
+
+        alert(`Nettoyage réussi ! ${deleted} équipement(s) vide(s) supprimé(s).`);
+    };
+
+    /**
      * Handles file upload from Corporate Software (GBE) or standard App exports.
      * Computes diff and opens interactive review modal.
      */
@@ -178,8 +220,14 @@ const ListEquipment = () => {
                 }
             }
 
-            // Items in app absent from uploaded file
-            const toDelete = equipements.filter(eq => !matchedAppIds.has(eq.id));
+            // Items in app absent from uploaded file (excluding already corrupted empty items)
+            const validEquipments = equipements.filter(e =>
+                e.nom &&
+                String(e.nom).trim() !== '' &&
+                String(e.nom).trim() !== 'Équipement sans nom' &&
+                String(e.nom).trim() !== 'Numéro'
+            );
+            const toDelete = validEquipments.filter(eq => !matchedAppIds.has(eq.id));
 
             setSyncDiffData({ toAdd, toUpdate, toDelete, unchangedCount });
             setIsSyncModalOpen(true);
@@ -245,6 +293,23 @@ const ListEquipment = () => {
                 onConfirm={handleConfirmSync}
                 isProcessing={isSyncProcessing}
             />
+
+            {/* Cleanup Alert Banner if corrupted/empty records exist */}
+            {emptyEquipmentsCount > 0 && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-3 text-xs text-amber-900">
+                    <div className="flex items-center gap-2">
+                        <AlertCircle size={18} className="text-amber-600 flex-shrink-0" />
+                        <span>{emptyEquipmentsCount} équipement(s) sans nom / vides détectés dans la base.</span>
+                    </div>
+                    <button
+                        onClick={handleCleanupEmpty}
+                        className="btn btn-sm bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs px-3 py-1 rounded-lg flex items-center gap-1.5 flex-shrink-0"
+                    >
+                        <Trash2 size={14} />
+                        Nettoyer ({emptyEquipmentsCount})
+                    </button>
+                </div>
+            )}
 
             {/* Action Bar */}
             <div className="flex flex-wrap items-center justify-end gap-2 mb-6">
