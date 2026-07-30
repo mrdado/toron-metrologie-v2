@@ -30,19 +30,19 @@ const ListToron = () => {
     const filteredTorons = useMemo(() => {
         const term = String(searchTerm || '').toLowerCase();
         return torons.filter(t =>
-            String(t.fournisseur || '').toLowerCase().includes(term) ||
-            String(t.identification || '').toLowerCase().includes(term)
+            String(t.identification || '').toLowerCase().includes(term) ||
+            String(t.fournisseur || '').toLowerCase().includes(term)
         );
     }, [torons, searchTerm]);
 
     const handleExport = () => {
         const dataToExport = filteredTorons.map(t => ({
             UUID: t.id,
+            Identification: String(t.identification || ''),
             Fournisseur: String(t.fournisseur || ''),
             Diametre: String(t.diametre || ''),
             Grade: String(t.grade || ''),
             Utilisation: String(t.utilisation || ''),
-            Identification: String(t.identification || ''),
             Essais: String(t.essais || '')
         }));
         exportToExcel(dataToExport, `Inventaire_Torons_${new Date().toISOString().split('T')[0]}`);
@@ -157,7 +157,7 @@ const ListToron = () => {
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         <input
                             type="text"
-                            placeholder="Rechercher par fournisseur ou identification..."
+                            placeholder="Rechercher par identification ou fournisseur..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             disabled={loading}
@@ -209,10 +209,17 @@ const ListToron = () => {
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
-                                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                    {String(toron.fournisseur || 'Toron sans nom')}
+                                {/* Line 1: Identification (main information) */}
+                                <h3 className="text-lg font-bold text-gray-900 mb-1">
+                                    {String(toron.identification || 'Toron sans identification')}
                                 </h3>
 
+                                {/* Line 2: Fournisseur */}
+                                <p className="text-sm text-gray-600 mb-2">
+                                    Fournisseur : <span className="font-medium text-gray-800">{String(toron.fournisseur || 'N/A')}</span>
+                                </p>
+
+                                {/* Line 3: Diamètre / Grade / Utilisation Badges */}
                                 <div className="flex flex-wrap gap-2 mb-2">
                                     {toron.diametre && (
                                         <span className="badge badge-gray">
@@ -231,16 +238,14 @@ const ListToron = () => {
                                     )}
                                 </div>
 
-                                <div className="flex items-center gap-3">
-                                    <p className="text-sm text-gray-500">
-                                        ID: {String(toron.identification || 'N/A')}
-                                    </p>
-                                    {Array.isArray(toron.certificates) && toron.certificates.length > 0 && (
-                                        <span className="flex items-center gap-1 text-blue-600 font-medium text-xs bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                                            <Upload size={12} />
-                                            {toron.certificates.length} {toron.certificates.length > 1 ? 'fichiers' : 'fichier'}
-                                        </span>
-                                    )}
+                                {/* Line 4: Number of files (always neutral badge-gray) */}
+                                <div className="flex items-center">
+                                    <span className="badge badge-gray flex items-center gap-1.5">
+                                        <Upload size={14} />
+                                        {Array.isArray(toron.certificates) && toron.certificates.length > 0
+                                            ? `${toron.certificates.length} ${toron.certificates.length > 1 ? 'fichiers' : 'fichier'}`
+                                            : '0 fichier'}
+                                    </span>
                                 </div>
                             </div>
 
