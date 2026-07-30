@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { FileSpreadsheet, Upload, Edit, AlertCircle, CheckCircle, Search } from 'lucide-react';
+import { FileSpreadsheet, Upload, Edit, AlertCircle, CheckCircle, Search, QrCode, Archive } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
 import { toDisplayDate, parseAnyDate } from '../../utils/dateUtils';
+import { exportQRCodesPDF, exportQRCodesZIP } from '../../utils/qrExport';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 import EmptyState from '../../components/ui/EmptyState';
 
@@ -102,6 +103,14 @@ const ListEquipment = () => {
             Etalonnage: String(e.etalonnage || '')
         }));
         exportToExcel(dataToExport, `Inventaire_Equipements_${new Date().toISOString().split('T')[0]}`);
+    };
+
+    const handleExportPDF = async () => {
+        await exportQRCodesPDF(filteredEquipments, 'equipment');
+    };
+
+    const handleExportZIP = async () => {
+        await exportQRCodesZIP(filteredEquipments, 'equipment');
     };
 
     const handleImportClick = () => {
@@ -206,10 +215,18 @@ const ListEquipment = () => {
     return (
         <div className="pb-8">
             {/* Action Bar */}
-            <div className="flex items-center justify-end gap-2 mb-6">
-                <button onClick={handleExport} className="btn btn-equipment btn-sm">
+            <div className="flex flex-wrap items-center justify-end gap-2 mb-6">
+                <button onClick={handleExportPDF} className="btn btn-equipment btn-sm">
+                    <QrCode size={18} />
+                    PDF QR Codes
+                </button>
+                <button onClick={handleExportZIP} className="btn btn-outline btn-sm">
+                    <Archive size={18} />
+                    ZIP QR Codes
+                </button>
+                <button onClick={handleExport} className="btn btn-outline btn-sm">
                     <FileSpreadsheet size={18} />
-                    Exporter
+                    Excel
                 </button>
                 <button onClick={handleImportClick} className="btn btn-outline btn-sm">
                     <Upload size={18} />

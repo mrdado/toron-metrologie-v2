@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '../../context/InventoryContext';
-import { FileSpreadsheet, Upload, Edit, Search } from 'lucide-react';
+import { FileSpreadsheet, Upload, Edit, Search, QrCode, Archive } from 'lucide-react';
 import { exportToExcel, importFromExcel } from '../../utils/excel';
+import { exportQRCodesPDF, exportQRCodesZIP } from '../../utils/qrExport';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 import EmptyState from '../../components/ui/EmptyState';
 
@@ -45,6 +46,14 @@ const ListToron = () => {
             Essais: String(t.essais || '')
         }));
         exportToExcel(dataToExport, `Inventaire_Torons_${new Date().toISOString().split('T')[0]}`);
+    };
+
+    const handleExportPDF = async () => {
+        await exportQRCodesPDF(filteredTorons, 'toron');
+    };
+
+    const handleExportZIP = async () => {
+        await exportQRCodesZIP(filteredTorons, 'toron');
     };
 
     const handleImportClick = () => {
@@ -110,10 +119,18 @@ const ListToron = () => {
     return (
         <div className="pb-8">
             {/* Action Bar */}
-            <div className="flex items-center justify-end gap-2 mb-6">
-                <button onClick={handleExport} className="btn btn-primary btn-sm">
+            <div className="flex flex-wrap items-center justify-end gap-2 mb-6">
+                <button onClick={handleExportPDF} className="btn btn-primary btn-sm">
+                    <QrCode size={18} />
+                    PDF QR Codes
+                </button>
+                <button onClick={handleExportZIP} className="btn btn-outline btn-sm">
+                    <Archive size={18} />
+                    ZIP QR Codes
+                </button>
+                <button onClick={handleExport} className="btn btn-outline btn-sm">
                     <FileSpreadsheet size={18} />
-                    Exporter
+                    Excel
                 </button>
                 <button onClick={handleImportClick} className="btn btn-outline btn-sm">
                     <Upload size={18} />
