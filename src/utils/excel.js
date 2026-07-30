@@ -65,31 +65,43 @@ export const importFromExcel = (file) => {
                 }
 
                 // Locate header row dynamically within first 20 rows
-                let headerIdx = 0;
+                let headerIdx = -1;
                 for (let i = 0; i < Math.min(20, rawRows.length); i++) {
-                    const rowStr = (rawRows[i] || []).join(' ').toLowerCase();
+                    const row = rawRows[i];
+                    if (!Array.isArray(row)) continue;
+
+                    // A true header row must have at least 3 non-empty column cells
+                    const filledCells = row.filter(c => c !== undefined && c !== null && String(c).trim() !== '');
+                    if (filledCells.length < 3) continue;
+
+                    const rowStr = row.map(c => String(c).toLowerCase()).join(' ');
                     if (
                         rowStr.includes('numéro') || rowStr.includes('numero') ||
                         rowStr.includes('type générique') || rowStr.includes('type generique') ||
-                        rowStr.includes('nom') || rowStr.includes('uuid')
+                        rowStr.includes('nom') || rowStr.includes('uuid') || rowStr.includes('statut')
                     ) {
                         headerIdx = i;
                         break;
                     }
                 }
 
+                if (headerIdx === -1) headerIdx = 0;
+
                 const headers = (rawRows[headerIdx] || []).map(h => String(h || '').trim());
                 const dataRows = rawRows.slice(headerIdx + 1);
 
                 // Helper to match column index by keywords
-                const findColIdx = (possibleKeywords) => {
+                const findColIdx = (possibleKeywords, exactMatch = false) => {
                     return headers.findIndex(h => {
-                        const hLower = h.toLowerCase();
+                        const hLower = h.toLowerCase().trim();
+                        if (exactMatch) {
+                            return possibleKeywords.some(kw => hLower === kw.toLowerCase());
+                        }
                         return possibleKeywords.some(kw => hLower.includes(kw.toLowerCase()));
                     });
                 };
 
-                const colUUID = findColIdx(['uuid', 'id']);
+                const colUUID = findColIdx(['uuid', 'id', 'id equipement', 'id équipement'], true);
                 const colNom = findColIdx(['numéro', 'numero', 'nom', 'name', 'équipement', 'equipement']);
                 const colType = findColIdx(['type générique', 'type generique', 'type', 'catégorie', 'categorie']);
                 const colCal = findColIdx(['date de création', 'date calibration', 'calibration', 'étalonnage', 'etalonnage']);

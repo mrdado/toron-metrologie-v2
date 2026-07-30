@@ -34,7 +34,7 @@ export const fromDisplayDate = (displayDate) => {
 
 /**
  * Parses various date formats into ISO (YYYY-MM-DD)
- * Handles: DD/MM/AAAA, AAAA-MM-DD, Excel numbers, and native Date objects (timezone-safe)
+ * Handles: DD/MM/AAAA, M/D/YY, AAAA-MM-DD, Excel numbers, and native Date objects (timezone-safe)
  */
 export const parseAnyDate = (date) => {
     if (!date) return '';
@@ -42,7 +42,6 @@ export const parseAnyDate = (date) => {
     // Handle native Date object (often from XLSX)
     if (date instanceof Date) {
         if (isNaN(date.getTime())) return '';
-        // Use local timezone components to avoid GMT offset day-shifts
         const yyyy = date.getFullYear();
         const mm = String(date.getMonth() + 1).padStart(2, '0');
         const dd = String(date.getDate()).padStart(2, '0');
@@ -73,10 +72,25 @@ export const parseAnyDate = (date) => {
         if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) return datePart;
     }
 
-    // If in DD/MM/AAAA or D/M/AAAA
-    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
+    // If in M/D/YY, M/D/YYYY, DD/MM/YYYY
+    if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(str)) {
         const parts = str.split('/');
-        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        let year = parts[2];
+        if (year.length === 2) {
+            year = '20' + year;
+        }
+        const p1 = parseInt(parts[0], 10);
+        const p2 = parseInt(parts[1], 10);
+        if (p1 > 12) {
+            // DD/MM/YYYY
+            return `${year}-${String(p2).padStart(2, '0')}-${String(p1).padStart(2, '0')}`;
+        } else if (p2 > 12) {
+            // MM/DD/YYYY
+            return `${year}-${String(p1).padStart(2, '0')}-${String(p2).padStart(2, '0')}`;
+        } else {
+            // Default to MM/DD/YYYY if US locale string or DD/MM/YYYY
+            return `${year}-${String(p1).padStart(2, '0')}-${String(p2).padStart(2, '0')}`;
+        }
     }
 
     return str;
