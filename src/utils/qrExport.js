@@ -1,18 +1,24 @@
 import jsPDF from 'jspdf';
 import JSZip from 'jszip';
 import QRCode from 'qrcode';
-import { toDisplayDate } from './dateUtils';
 
-// Sanitize string for filenames
+/**
+ * Normalizes string by stripping French accents/diacritics and converting spaces to underscores.
+ * e.g., "Déplacement" -> "Deplacement", "Règle" -> "Regle", "Équipement 01" -> "Equipement_01"
+ */
 const sanitizeFileName = (name) => {
-    return String(name || '')
-        .replace(/[^a-zA-Z0-9_\-]/g, '_')
-        .replace(/_+/g, '_')
-        .replace(/^_|_$/g, '') || 'item';
+    if (!name) return '';
+    return String(name)
+        .normalize('NFD')                    // Decompose accented chars (e.g. 'é' -> 'e' + accent mark)
+        .replace(/[\u0300-\u036f]/g, '')    // Remove accent marks
+        .replace(/[^a-zA-Z0-9_\-\s]/g, '')  // Remove special symbols
+        .trim()
+        .replace(/\s+/g, '_');               // Replace spaces with underscores
 };
 
 /**
- * Exports items as an organized printable PDF sheet (3 columns x 3 rows grid per A4 page)
+ * Exports items as a clean printable PDF sheet (3 columns x 3 rows grid per A4 page)
+ * Each card contains ONLY the QR Code and the "nom".
  */
 export const exportQRCodesPDF = async (items, type = 'equipment') => {
     if (!items || items.length === 0) {
@@ -30,11 +36,11 @@ export const exportQRCodesPDF = async (items, type = 'equipment') => {
     const titleText = isEquipment ? 'IPS TestLAB - Équipements QR Codes' : 'IPS TestLAB - Torons QR Codes';
     const dateStr = new Date().toLocaleDateString('fr-FR');
 
-    // Page Grid setup (3 columns x 3 rows = 9 cards per page)
+    // Grid layout (3 columns x 3 rows = 9 cards per page)
     const cardsPerRow = 3;
     const cardsPerPage = 9;
     const cardWidth = 56;  // mm
-    const cardHeight = 72; // mm
+    const cardHeight = 65; // mm (compact height for QR code + nom)
     const startX = 14;     // mm margin left
     const startY = 32;     // mm margin top
     const gapX = 7;        // mm gap between columns
@@ -49,7 +55,6 @@ export const exportQRCodesPDF = async (items, type = 'equipment') => {
 
         // Draw Header on new page
         if (pageItemIndex === 0) {
-            // Header Bar
             doc.setFillColor(75, 107, 166); // #4B6BA6 (Brand Blue)
             doc.rect(0, 0, 210, 18, 'F');
 
@@ -80,15 +85,9 @@ export const exportQRCodesPDF = async (items, type = 'equipment') => {
         const itemId = String(item.id || '');
         const itemName = isEquipment
             ? String(item.nom || 'Équipement')
-            : String(item.fournisseur || 'Toron');
-        const itemSubInfo = isEquipment
-            ? `Type: ${item.type || 'Divers'}`
-            : `Grade: ${item.grade || 'N/A'}`;
-        const itemExtraInfo = isEquipment
-            ? (item.dateExpiration ? `Exp: ${toDisplayDate(item.dateExpiration)}` : '')
-            : (item.identification ? `ID: ${item.identification}` : '');
+            : String(item.fournisseur || item.identification || 'Toron');
 
-        // Draw Card Container Box
+        // Draw Card Box
         doc.setFillColor(248, 250, 252); // slate-50
         doc.setDrawColor(203, 213, 225); // slate-300
         doc.roundedRect(x, y, cardWidth, cardHeight, 3, 3, 'FD');
@@ -97,16 +96,15 @@ export const exportQRCodesPDF = async (items, type = 'equipment') => {
         doc.setFillColor(isEquipment ? 20 : 79, isEquipment ? 184 : 70, isEquipment ? 166 : 229);
         doc.rect(x, y, cardWidth, 2.5, 'F');
 
-        // Generate QR Code Data URL
+        // Generate and draw QR Code (Size: 38mm x 38mm)
         try {
             const qrDataUrl = await QRCode.toDataURL(itemId, {
-                width: 300,
+                width: 400,
                 margin: 1,
                 color: { dark: '#000000', light: '#FFFFFF' }
             });
 
-            // Draw QR Code Image inside Card
-            const qrSize = 34; // mm
+            const qrSize = 38; // mm
             const qrX = x + (cardWidth - qrSize) / 2;
             const qrY = y + 5;
             doc.addImage(qrDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
@@ -114,32 +112,12 @@ export const exportQRCodesPDF = async (items, type = 'equipment') => {
             console.error("Error generating QR for PDF:", qrErr);
         }
 
-        // Draw Text inside Card
+        // Draw ONLY the "Nom" below the QR Code
         doc.setTextColor(30, 41, 59); // slate-800
-        doc.setFontSize(9);
+        doc.setFontSize(10);
         doc.setFont('helvetica', 'bold');
         const truncatedName = itemName.length > 22 ? itemName.substring(0, 20) + '...' : itemName;
-        doc.text(truncatedName, x + cardWidth / 2, y + 43, { align: 'center' });
-
-        doc.setTextColor(71, 85, 105); // slate-600
-        doc.setFontSize(7.5);
-        doc.setFont('helvetica', 'normal');
-        doc.text(itemSubInfo, x + cardWidth / 2, y + 48, { align: 'center' });
-
-        if (itemExtraInfo) {
-            doc.setTextColor(100, 116, 139);
-            doc.setFontSize(7);
-            doc.text(itemExtraInfo, x + cardWidth / 2, y + 53, { align: 'center' });
-        }
-
-        // Draw Mono ID at bottom
-        doc.setFillColor(241, 245, 249);
-        doc.rect(x + 2, y + 58, cardWidth - 4, 10, 'F');
-        doc.setTextColor(148, 163, 184);
-        doc.setFontSize(6);
-        doc.setFont('courier', 'normal');
-        const truncatedId = itemId.length > 24 ? itemId.substring(0, 22) + '...' : itemId;
-        doc.text(truncatedId, x + cardWidth / 2, y + 64, { align: 'center' });
+        doc.text(truncatedName, x + cardWidth / 2, y + 52, { align: 'center' });
 
         // Page Number Footer
         const totalPages = Math.ceil(items.length / cardsPerPage);
@@ -155,7 +133,9 @@ export const exportQRCodesPDF = async (items, type = 'equipment') => {
 };
 
 /**
- * Exports items as a ZIP archive containing individual high-resolution PNG image files
+ * Exports items as a ZIP archive containing individual high-resolution PNG image files.
+ * File names are strictly [Type]_[Nom].png (with French accents properly normalized).
+ * Example: "Déplacement" + "Capteur 01" -> "Deplacement_Capteur_01.png"
  */
 export const exportQRCodesZIP = async (items, type = 'equipment') => {
     if (!items || items.length === 0) {
@@ -168,19 +148,34 @@ export const exportQRCodesZIP = async (items, type = 'equipment') => {
     const folderName = isEquipment ? 'QRCodes_Equipements' : 'QRCodes_Torons';
     const folder = zip.folder(folderName);
 
+    const usedFileNames = new Set();
+
     for (let i = 0; i < items.length; i++) {
         const item = items[i];
         const itemId = String(item.id || '');
+
+        const itemType = isEquipment
+            ? String(item.type || 'Divers')
+            : String(item.utilisation || item.grade || 'Toron');
+
         const itemName = isEquipment
             ? String(item.nom || 'Equipement')
-            : String(item.fournisseur || 'Toron');
-        const itemExtra = isEquipment
-            ? (item.type || 'Divers')
-            : (item.identification || item.grade || '');
+            : String(item.fournisseur || item.identification || 'Toron');
 
-        const safeName = sanitizeFileName(itemName);
-        const safeExtra = sanitizeFileName(itemExtra);
-        const fileName = `QRCode_${safeName}_${safeExtra}_${itemId.substring(0, 8)}.png`;
+        const cleanType = sanitizeFileName(itemType);
+        const cleanNom = sanitizeFileName(itemName);
+
+        // Strict format: [Type]_[Nom].png
+        let baseFileName = `${cleanType}_${cleanNom}`;
+        let fileName = `${baseFileName}.png`;
+
+        // Handle duplicates safely if two items have identical Type and Nom
+        let duplicateCounter = 1;
+        while (usedFileNames.has(fileName.toLowerCase())) {
+            duplicateCounter++;
+            fileName = `${baseFileName}_${duplicateCounter}.png`;
+        }
+        usedFileNames.add(fileName.toLowerCase());
 
         try {
             // Generate high-resolution PNG (600x600 px)
